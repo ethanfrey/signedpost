@@ -10,7 +10,7 @@ type AccountQuery struct {
 
 // AccountResponse is the return value from an AccountQuery
 type AccountResponse struct {
-	db.Account // TODO: modify later... eg. proof
+	*db.Account // TODO: modify later... eg. proof
 }
 
 // EntryQuery finds an entry by account pk and (optional) number

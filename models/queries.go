@@ -1,6 +1,6 @@
 package models
 
-import "github.com/ethanfrey/bloggermint/db"
+import "github.com/ethanfrey/signedpost/db"
 
 // AccountQuery finds an account by pk or name
 type AccountQuery struct {

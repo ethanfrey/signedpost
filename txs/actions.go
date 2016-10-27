@@ -1,4 +1,4 @@
-package controllers
+package txs
 
 import (
 	"github.com/ethanfrey/signedpost/db"

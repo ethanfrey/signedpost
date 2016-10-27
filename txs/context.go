@@ -1,4 +1,4 @@
-package controllers
+package txs
 
 import merkle "github.com/tendermint/go-merkle"
 

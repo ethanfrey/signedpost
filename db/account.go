@@ -9,6 +9,7 @@ import (
 )
 
 var accountPrefix = []byte("u")
+var endAccountPrefix = []byte("v")
 
 // Account is a named account that can publish blog entries
 type Account struct {
@@ -70,10 +71,10 @@ func FindAccountByPK(store *merkle.IAVLTree, pk []byte) (*Account, error) {
 	return LoadAccount(pk, data)
 }
 
-// FindAccountByName does a table-scan for name match (later secondary index?)
+// FindAccountByName does a table-scan over accounts for name match (later secondary index?)
 func FindAccountByName(store *merkle.IAVLTree, name string) (*Account, error) {
 	var match *Account
-	store.Iterate(func(key []byte, value []byte) bool {
+	store.IterateRange(accountPrefix, endAccountPrefix, true, func(key []byte, value []byte) bool {
 		acct, err := LoadAccount(key, value)
 		if err != nil && acct.Name == name {
 			match = acct

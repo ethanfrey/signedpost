@@ -1,0 +1,81 @@
+hash: 036155212da9e4f565d1879fc34ac8f0492638026e52a6c9ff3444c982708e4a
+updated: 2016-10-27T18:47:13.699840048+02:00
+imports:
+- name: github.com/go-stack/stack
+  version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
+- name: github.com/golang/protobuf
+  version: 1f49d83d9aa00e6ce4fc8258c71cc7786aec968a
+  subpackages:
+  - proto
+- name: github.com/golang/snappy
+  version: d9eb7a3d35ec988b8585d4a0068e462c27d28380
+- name: github.com/mattn/go-colorable
+  version: 6c903ff4aa50920ca86087a280590b36b3152b9c
+- name: github.com/mattn/go-isatty
+  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: github.com/syndtr/goleveldb
+  version: 6b4daa5362b502898ddf367c5c11deb9e7a5c727
+  subpackages:
+  - leveldb
+  - leveldb/cache
+  - leveldb/comparer
+  - leveldb/errors
+  - leveldb/filter
+  - leveldb/iterator
+  - leveldb/journal
+  - leveldb/memdb
+  - leveldb/opt
+  - leveldb/storage
+  - leveldb/table
+  - leveldb/util
+- name: github.com/tendermint/go-common
+  version: 1c62bb6dadc6269aeecad5f9e7b153d950a54362
+- name: github.com/tendermint/go-db
+  version: 31fdd21c7eaeed53e0ea7ca597fb1e960e2988a5
+- name: github.com/tendermint/go-logger
+  version: cefb3a45c0bf3c493a04e9bcd9b1540528be59f2
+- name: github.com/tendermint/go-merkle
+  version: 3cc216e31eade07d5d3f249c4476d201813e4971
+  repo: https://github.com/ethanfrey/go-merkle.git
+- name: github.com/tendermint/go-wire
+  version: 287d8caeae91d21686340f5f87170560531681e6
+- name: github.com/tendermint/log15
+  version: 9545b249b3aacafa97f79e0838b02b274adc6f5f
+  subpackages:
+  - term
+- name: github.com/tendermint/tmsp
+  version: ab98bffbb1a9d8e1df9fb673406f892ac7f8a414
+  subpackages:
+  - types
+- name: golang.org/x/crypto
+  version: 81372b2fc2f10bef2a7f338da115c315a56b2726
+  subpackages:
+  - ripemd160
+- name: golang.org/x/net
+  version: 71a035914f99bb58fe82eac0f1289f10963d876c
+  subpackages:
+  - context
+  - http2
+  - http2/hpack
+  - idna
+  - internal/timeseries
+  - lex/httplex
+  - trace
+- name: golang.org/x/sys
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  subpackages:
+  - unix
+- name: google.golang.org/grpc
+  version: 396f8ba2a6b9039070f4ff97561f5e408828fccd
+  subpackages:
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - peer
+  - transport
+testImports: []

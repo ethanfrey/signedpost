@@ -1,0 +1,9 @@
+package: github.com/ethanfrey/signedpost
+import:
+- package: github.com/pkg/errors
+  version: ^0.8.0
+- package: github.com/tendermint/go-merkle
+  repo: https://github.com/ethanfrey/go-merkle.git
+- package: github.com/tendermint/tmsp
+  subpackages:
+  - types

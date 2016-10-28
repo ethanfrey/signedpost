@@ -20,7 +20,6 @@ func init() {
 		wire.ConcreteType{crypto.SignatureEd25519{}, crypto.SignatureTypeEd25519},
 		wire.ConcreteType{crypto.SignatureSecp256k1{}, crypto.SignatureTypeSecp256k1},
 	)
-
 }
 
 // ValidatedAction is returned after properly parsing a SignedAction and validating the signature

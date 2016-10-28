@@ -59,6 +59,7 @@ func LoadAccount(key, value []byte) (*Account, error) {
 }
 
 // FindAccountByPK looks up by primary key (index scan)
+// Error on storage error, if no match, returns nil
 func FindAccountByPK(store *merkle.IAVLTree, pk []byte) (*Account, error) {
 	id, err := accountPKToID(pk)
 	if err != nil {
@@ -66,7 +67,7 @@ func FindAccountByPK(store *merkle.IAVLTree, pk []byte) (*Account, error) {
 	}
 	_, data, exists := store.Get(id)
 	if !exists || data == nil {
-		return nil, errors.New("No account for this pk")
+		return nil, nil
 	}
 	return LoadAccount(pk, data)
 }

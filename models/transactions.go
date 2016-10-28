@@ -4,7 +4,7 @@ import "github.com/tendermint/go-wire"
 
 func init() {
 	wire.RegisterInterface(
-		ActionWrap{},
+		actionWrapper{},
 		wire.ConcreteType{O: CreateAccountAction{}, Byte: 0x01},
 		wire.ConcreteType{O: &CreateAccountAction{}, Byte: 0x02},
 		wire.ConcreteType{O: AddEntryAction{}, Byte: 0x03},
@@ -12,8 +12,8 @@ func init() {
 	)
 }
 
-// ActionWrap is needed by go-wire to handle the interface
-type ActionWrap struct {
+// actionWrapper is needed by go-wire to handle the interface
+type actionWrapper struct {
 	Action
 }
 

@@ -36,8 +36,8 @@ func CreateAccount(ctx *Context, tx models.CreateAccountAction) tmsp.Result {
 		Name:       tx.Name,
 		EntryCount: 0,
 	}
-	addr := ctx.Signer().Address()
-	account.Save(ctx.GetDB(), addr)
+	key, _ := db.AccountKeyFromPK(ctx.Signer())
+	account.Save(ctx.GetDB(), key)
 	// return the new pk as response
-	return tmsp.NewResultOK(addr, "")
+	return tmsp.NewResultOK(key, "")
 }

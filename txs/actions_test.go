@@ -15,6 +15,7 @@ func TestCreateUser(t *testing.T) {
 	alice := crypto.GenPrivKeyEd25519()
 	bob := crypto.GenPrivKeyEd25519()
 	tree := merkle.NewIAVLTree(0, nil) // in-memory
+	assert.Equal(0, tree.Size())
 
 	anon := &Context{
 		store: tree,
@@ -24,6 +25,7 @@ func TestCreateUser(t *testing.T) {
 	// anon is prevented
 	r := CreateAccount(anon, tx)
 	assert.True(r.IsErr(), "%+v", r.Code)
+	assert.Equal(0, tree.Size())
 
 	// success for self-creation
 	ctx := &Context{
@@ -32,9 +34,10 @@ func TestCreateUser(t *testing.T) {
 	}
 	r = CreateAccount(ctx, tx)
 	assert.False(r.IsErr(), r.Error())
+	assert.Equal(1, tree.Size())
 
 	// let's check this account by key
-	data, err := db.FindAccountByPK(tree, ctx.Signer().Address())
+	data, err := db.FindAccountByPK(tree, ctx.Signer())
 	assert.Nil(err)
 	if assert.NotNil(data) {
 		assert.Equal(data.Name, "Alice")

@@ -24,25 +24,13 @@ type Account struct {
 	EntryCount int    // total number of entries (de-normalize for speed)
 }
 
-func accountPKToKey(pk crypto.PubKey) ([]byte, error) {
+// AccountKeyFromPK creates the db key from a public key
+func AccountKeyFromPK(pk crypto.PubKey) ([]byte, error) {
 	if pk == nil {
 		return nil, errors.New("Empty private key")
 	}
-	return accountAddrToKey(pk.Address())
-}
-
-func accountAddrToKey(addr []byte) ([]byte, error) {
-	if len(addr) < 1 {
-		return nil, errors.New("Empty address")
-	}
+	addr := pk.Address()
 	return append(accountPrefix, addr...), nil
-}
-
-func accountKeytoAddr(id []byte) ([]byte, error) {
-	if id == nil || len(id) < 2 || id[0] != accountPrefix[0] {
-		return nil, errors.New("Invalid account ID")
-	}
-	return id[1:], nil
 }
 
 // Serialize turns the structure into bytes for storage and signing
@@ -56,14 +44,13 @@ func (acct *Account) Deserialize(data []byte) error {
 }
 
 // Save stores they data at the given address
-func (acct Account) Save(store *merkle.IAVLTree, addr []byte) (bool, error) {
+func (acct Account) Save(store *merkle.IAVLTree, key []byte) (bool, error) {
 	data, err := acct.Serialize()
 	if err != nil {
 		return false, err
 	}
-	key, err := accountAddrToKey(addr)
-	if err != nil {
-		return false, err
+	if len(key) < 16 {
+		return false, errors.New("Key must be at least 16 bytes")
 	}
 	return store.Set(key, data), nil
 }
@@ -71,24 +58,15 @@ func (acct Account) Save(store *merkle.IAVLTree, addr []byte) (bool, error) {
 // FindAccountByPK looks up by primary key (index scan)
 // Error on storage error, if no match, returns nil
 func FindAccountByPK(store *merkle.IAVLTree, pk crypto.PubKey) (*Account, error) {
-	key, err := accountPKToKey(pk)
+	key, err := AccountKeyFromPK(pk)
 	if err != nil {
 		return nil, err
 	}
-	return findAccountByKey(store, key)
+	return FindAccountByKey(store, key)
 }
 
-// FindAccountByAddr looks up by primary key (index scan)
-// Error on storage error, if no match, returns nil
-func FindAccountByAddr(store *merkle.IAVLTree, addr []byte) (*Account, error) {
-	key, err := accountAddrToKey(addr)
-	if err != nil {
-		return nil, err
-	}
-	return findAccountByKey(store, key)
-}
-
-func findAccountByKey(store *merkle.IAVLTree, key []byte) (*Account, error) {
+// FindAccountByKey looks up the account by the db key
+func FindAccountByKey(store *merkle.IAVLTree, key []byte) (*Account, error) {
 	_, data, exists := store.Get(key)
 	if !exists || data == nil {
 		return nil, nil
@@ -101,11 +79,11 @@ func findAccountByKey(store *merkle.IAVLTree, key []byte) (*Account, error) {
 // FindAccountByName does a table-scan over accounts for name match (later secondary index?)
 func FindAccountByName(store *merkle.IAVLTree, name string) (*Account, error) {
 	var match *Account
+	acct := new(Account)
 	store.IterateRange(accountPrefix, endAccountPrefix, true, func(key []byte, value []byte) bool {
-		acct := Account{}
 		err := acct.Deserialize(value)
 		if err == nil && acct.Name == name {
-			match = &acct
+			match = acct
 			return true
 		}
 		return false

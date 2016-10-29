@@ -1,93 +1,114 @@
 package db
 
 import (
-	"encoding/json"
-
+	"github.com/ethanfrey/signedpost/utils"
 	"github.com/pkg/errors"
 
+	crypto "github.com/tendermint/go-crypto"
 	merkle "github.com/tendermint/go-merkle"
 )
 
 var accountPrefix = []byte("u")
 var endAccountPrefix = []byte("v")
 
-// Account is a named account that can publish blog entries
-type Account struct {
-	PK         []byte `json:"-"`           // this is the public key of the owner
-	Name       string `json:"name"`        // this is a name to search for
-	EntryCount int    `json:"num_entries"` // total number of entries (de-normalize for speed)
+// Field represents the Key, Value pair for a leaf node
+type Field struct {
+	Key   []byte
+	Value []byte
 }
 
-func accountPKToID(pk []byte) ([]byte, error) {
-	if pk == nil || len(pk) < 1 {
+// Account is a named account that can publish blog entries
+// This can be serialized with go-wire
+type Account struct {
+	Name       string // this is a name to search for
+	EntryCount int    // total number of entries (de-normalize for speed)
+}
+
+func accountPKToKey(pk crypto.PubKey) ([]byte, error) {
+	if pk == nil {
 		return nil, errors.New("Empty private key")
 	}
-	return append(accountPrefix, pk...), nil
+	return accountAddrToKey(pk.Address())
 }
 
-func accountIDtoPK(id []byte) ([]byte, error) {
+func accountAddrToKey(addr []byte) ([]byte, error) {
+	if len(addr) < 1 {
+		return nil, errors.New("Empty address")
+	}
+	return append(accountPrefix, addr...), nil
+}
+
+func accountKeytoAddr(id []byte) ([]byte, error) {
 	if id == nil || len(id) < 2 || id[0] != accountPrefix[0] {
 		return nil, errors.New("Invalid account ID")
 	}
-	return id[1 : len(id)-1], nil
-}
-
-// ID gives you the db id of the account
-func (acct *Account) ID() []byte {
-	id, _ := accountPKToID(acct.PK)
-	return id
+	return id[1:], nil
 }
 
 // Serialize turns the structure into bytes for storage and signing
-func (acct *Account) Serialize() []byte {
-	data, err := json.Marshal(acct)
-	if err != nil {
-		panic(err)
-	}
-	return data
+func (acct Account) Serialize() ([]byte, error) {
+	return utils.ToBinary(acct)
 }
 
-// LoadAccount takes db data and puts it into the structure
-func LoadAccount(key, value []byte) (*Account, error) {
-	acct := new(Account)
-	err := json.Unmarshal(value, acct)
+// Deserialize recovers the data bytes
+func (acct *Account) Deserialize(data []byte) error {
+	return utils.FromBinary(data, acct)
+}
+
+// Save stores they data at the given address
+func (acct Account) Save(store *merkle.IAVLTree, addr []byte) (bool, error) {
+	data, err := acct.Serialize()
 	if err != nil {
-		return nil, err
+		return false, err
 	}
-	acct.PK = key
-	return acct, nil
+	key, err := accountAddrToKey(addr)
+	if err != nil {
+		return false, err
+	}
+	return store.Set(key, data), nil
 }
 
 // FindAccountByPK looks up by primary key (index scan)
 // Error on storage error, if no match, returns nil
-func FindAccountByPK(store *merkle.IAVLTree, pk []byte) (*Account, error) {
-	id, err := accountPKToID(pk)
+func FindAccountByPK(store *merkle.IAVLTree, pk crypto.PubKey) (*Account, error) {
+	key, err := accountPKToKey(pk)
 	if err != nil {
 		return nil, err
 	}
-	_, data, exists := store.Get(id)
+	return findAccountByKey(store, key)
+}
+
+// FindAccountByAddr looks up by primary key (index scan)
+// Error on storage error, if no match, returns nil
+func FindAccountByAddr(store *merkle.IAVLTree, addr []byte) (*Account, error) {
+	key, err := accountAddrToKey(addr)
+	if err != nil {
+		return nil, err
+	}
+	return findAccountByKey(store, key)
+}
+
+func findAccountByKey(store *merkle.IAVLTree, key []byte) (*Account, error) {
+	_, data, exists := store.Get(key)
 	if !exists || data == nil {
 		return nil, nil
 	}
-	return LoadAccount(pk, data)
+	acct := Account{}
+	err := acct.Deserialize(data)
+	return &acct, err
 }
 
 // FindAccountByName does a table-scan over accounts for name match (later secondary index?)
 func FindAccountByName(store *merkle.IAVLTree, name string) (*Account, error) {
 	var match *Account
 	store.IterateRange(accountPrefix, endAccountPrefix, true, func(key []byte, value []byte) bool {
-		acct, err := LoadAccount(key, value)
-		if err != nil && acct.Name == name {
-			match = acct
+		acct := Account{}
+		err := acct.Deserialize(value)
+		if err == nil && acct.Name == name {
+			match = &acct
 			return true
 		}
 		return false
 	})
 	return match, nil
-}
-
-// Save will create or update account
-func (acct *Account) Save(store *merkle.IAVLTree) bool {
-	data := acct.Serialize()
-	return store.Set(acct.ID(), data)
 }

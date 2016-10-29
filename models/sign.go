@@ -3,6 +3,7 @@ package models
 import (
 	"bytes"
 
+	"github.com/ethanfrey/signedpost/utils"
 	"github.com/pkg/errors"
 	"github.com/tendermint/go-crypto"
 	"github.com/tendermint/go-wire"
@@ -37,12 +38,12 @@ type SignedAction struct {
 
 // Serialize gives a wire version of this action, reversed by Deserialize
 func (tx SignedAction) Serialize() ([]byte, error) {
-	return ToBinary(tx)
+	return utils.ToBinary(tx)
 }
 
 // Deserialize will set the content of this SignedAction to the bytes on the wire
 func (tx *SignedAction) Deserialize(data []byte) error {
-	return FromBinary(data, tx)
+	return utils.FromBinary(data, tx)
 }
 
 // Validate will deserialize the contained action, and validate the signature or return an error

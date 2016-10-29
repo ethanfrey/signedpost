@@ -11,10 +11,9 @@ func CreateAccount(ctx *Context, tx models.CreateAccountAction) tmsp.Result {
 	if ctx.IsAnon() {
 		return tmsp.NewError(tmsp.CodeType_Unauthorized, "Must sign transaction")
 	}
-	addr := ctx.Signer().Address()
 
 	// make sure none with this name or pk already....
-	exists, err := db.FindAccountByPK(ctx.GetDB(), addr)
+	exists, err := db.FindAccountByPK(ctx.GetDB(), ctx.Signer())
 	if err != nil {
 		return tmsp.NewError(tmsp.CodeType_BaseInvalidInput, err.Error())
 	}
@@ -34,11 +33,11 @@ func CreateAccount(ctx *Context, tx models.CreateAccountAction) tmsp.Result {
 
 	// all safe, go save it
 	account := db.Account{
-		PK:         addr,
 		Name:       tx.Name,
 		EntryCount: 0,
 	}
-	account.Save(ctx.GetDB())
+	addr := ctx.Signer().Address()
+	account.Save(ctx.GetDB(), addr)
 	// return the new pk as response
-	return tmsp.NewResultOK(account.PK, "")
+	return tmsp.NewResultOK(addr, "")
 }

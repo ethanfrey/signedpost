@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/tendermint/go-wire"
@@ -10,12 +11,14 @@ import (
 // ToBinary serialize the object to a byte slice using go-wire
 // obj: the object to serialize
 func ToBinary(obj interface{}) ([]byte, error) {
+	// return wire.BinaryBytes(obj), nil
 	var err error
 	w, n := new(bytes.Buffer), new(int)
 	wire.WriteBinary(obj, w, n, &err)
 	if err != nil {
 		return nil, errors.Wrap(err, "To Binary")
 	}
+	fmt.Printf("no errors: %d %v - %#v", *n, err, obj)
 	return w.Bytes(), nil
 }
 

@@ -1,27 +1,27 @@
 package redux
 
 import (
-	"github.com/tendermint/go-crypto"
+	"github.com/ethanfrey/signedpost/txn"
 	merkle "github.com/tendermint/go-merkle"
+	tmsp "github.com/tendermint/tmsp/types"
 )
 
-// Service contains info on the current request
+// Service contains all static info to process transactions
 type Service struct {
-	// Signer is the public key that signed the transaction (may be nil)
-	signer crypto.PubKey
-	store  *merkle.IAVLTree
-}
-
-// IsAnon is set if there is no signature
-func (c *Service) IsAnon() bool {
-	return c == nil || c.signer == nil
-}
-
-// Signer gets the signer's public key for authentication
-func (c *Service) Signer() crypto.PubKey {
-	return c.signer
+	// TODO: logger, block height
+	store *merkle.IAVLTree
 }
 
 func (c *Service) GetDB() *merkle.IAVLTree {
 	return c.store
+}
+
+// Apply will take any authentication action and apply it to the store
+// TODO: change result type??
+func (c *Service) Apply(tx txn.ValidatedAction) tmsp.Result {
+	switch action := tx.GetAction().(type) {
+	case txn.CreateAccountAction:
+		return c.CreateAccount(action, tx.GetSigner())
+	}
+	return tmsp.NewError(tmsp.CodeType_BaseInvalidInput, "Unknown action")
 }

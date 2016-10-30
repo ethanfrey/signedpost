@@ -17,27 +17,23 @@ func TestCreateUser(t *testing.T) {
 	tree := merkle.NewIAVLTree(0, nil) // in-memory
 	assert.Equal(0, tree.Size())
 
-	anon := &Service{
+	srv := &Service{
 		store: tree,
 	}
 	tx := txn.CreateAccountAction{Name: "Alice"}
 
 	// anon is prevented
-	r := CreateAccount(anon, tx)
+	r := srv.CreateAccount(tx, nil)
 	assert.True(r.IsErr(), "%+v", r.Code)
 	assert.Equal(0, tree.Size())
 
 	// success for self-creation
-	ctx := &Service{
-		store:  tree,
-		signer: alice.PubKey(),
-	}
-	r = CreateAccount(ctx, tx)
+	r = srv.CreateAccount(tx, alice.PubKey())
 	assert.False(r.IsErr(), r.Error())
 	assert.Equal(1, tree.Size())
 
 	// let's check this account by key
-	data, err := store.FindAccountByPK(tree, ctx.Signer())
+	data, err := store.FindAccountByPK(tree, alice.PubKey())
 	assert.Nil(err)
 	if assert.NotNil(data) {
 		assert.Equal(data.Name, "Alice")
@@ -52,19 +48,14 @@ func TestCreateUser(t *testing.T) {
 
 	// error by second name
 	tx2 := txn.CreateAccountAction{Name: "Bob"}
-	r = CreateAccount(ctx, tx)
+	r = srv.CreateAccount(tx, alice.PubKey())
 	assert.True(r.IsErr(), "%+v", r.Code)
 
-	// but bob can make a new account
-	ctx2 := &Service{
-		store:  tree,
-		signer: bob.PubKey(),
-	}
 	// cannot claim the same name (taken)
-	r = CreateAccount(ctx2, tx)
+	r = srv.CreateAccount(tx, bob.PubKey())
 	assert.True(r.IsErr(), "%+v", r.Code)
 	// but he can claim his own name
-	r = CreateAccount(ctx2, tx2)
+	r = srv.CreateAccount(tx2, bob.PubKey())
 	assert.False(r.IsErr(), r.Error())
 
 	// TODO: add queries

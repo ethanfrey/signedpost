@@ -7,8 +7,8 @@ func init() {
 		actionWrapper{},
 		wire.ConcreteType{O: CreateAccountAction{}, Byte: 0x01},
 		wire.ConcreteType{O: &CreateAccountAction{}, Byte: 0x02},
-		wire.ConcreteType{O: AddEntryAction{}, Byte: 0x03},
-		wire.ConcreteType{O: &AddEntryAction{}, Byte: 0x04},
+		wire.ConcreteType{O: AddPostAction{}, Byte: 0x03},
+		wire.ConcreteType{O: &AddPostAction{}, Byte: 0x04},
 	)
 }
 
@@ -32,13 +32,13 @@ func (c CreateAccountAction) IsAction() error {
 	return nil
 }
 
-// AddEntryAction is used for an existing account to append an entry to its list
-type AddEntryAction struct {
+// AddPostAction is used for an existing account to append an entry to its list
+type AddPostAction struct {
 	Title   string
 	Content string
 }
 
 // IsAction fulfills interface for go-wire
-func (c AddEntryAction) IsAction() error {
+func (c AddPostAction) IsAction() error {
 	return nil
 }

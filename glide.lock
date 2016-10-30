@@ -1,6 +1,12 @@
 hash: 036155212da9e4f565d1879fc34ac8f0492638026e52a6c9ff3444c982708e4a
-updated: 2016-10-27T18:47:13.699840048+02:00
+updated: 2016-10-30T21:41:24.836877513+01:00
 imports:
+- name: github.com/btcsuite/btcd
+  version: 83432785f3df1f0b6f8e6926dfe0987a34ea5b3c
+  subpackages:
+  - btcec
+- name: github.com/btcsuite/fastsha256
+  version: 637e656429416087660c84436a2a035d69d54e2e
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/golang/protobuf
@@ -30,14 +36,21 @@ imports:
   - leveldb/storage
   - leveldb/table
   - leveldb/util
+- name: github.com/tendermint/ed25519
+  version: 1f52c6f8b8a5c7908aff4497c186af344b428925
+  subpackages:
+  - edwards25519
+  - extra25519
 - name: github.com/tendermint/go-common
   version: 1c62bb6dadc6269aeecad5f9e7b153d950a54362
+- name: github.com/tendermint/go-crypto
+  version: 4b11d62bdb324027ea01554e5767b71174680ba0
 - name: github.com/tendermint/go-db
   version: 31fdd21c7eaeed53e0ea7ca597fb1e960e2988a5
 - name: github.com/tendermint/go-logger
   version: cefb3a45c0bf3c493a04e9bcd9b1540528be59f2
 - name: github.com/tendermint/go-merkle
-  version: 3cc216e31eade07d5d3f249c4476d201813e4971
+  version: 641e5717ee78f9d7017df244172c2a3d59a6c987
   repo: https://github.com/ethanfrey/go-merkle.git
 - name: github.com/tendermint/go-wire
   version: 287d8caeae91d21686340f5f87170560531681e6
@@ -52,7 +65,12 @@ imports:
 - name: golang.org/x/crypto
   version: 81372b2fc2f10bef2a7f338da115c315a56b2726
   subpackages:
+  - nacl/secretbox
+  - openpgp/armor
+  - openpgp/errors
+  - poly1305
   - ripemd160
+  - salsa20/salsa
 - name: golang.org/x/net
   version: 71a035914f99bb58fe82eac0f1289f10963d876c
   subpackages:
@@ -78,4 +96,17 @@ imports:
   - naming
   - peer
   - transport
-testImports: []
+testImports:
+- name: github.com/davecgh/go-spew
+  version: 346938d642f2ec3594ed81d874461961cd0faa76
+  subpackages:
+  - spew
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
+  subpackages:
+  - assert
+  - require

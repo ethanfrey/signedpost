@@ -11,8 +11,8 @@ import (
 
 // Post represents one verifiably immutable blog entry (so no typos ;)
 type Post struct {
-	Number         int
-	PublishedBlock int64
+	Number         int64
+	PublishedBlock uint64
 	Title          string
 	Content        string
 }
@@ -21,7 +21,7 @@ var postPrefix = []byte("p")
 var endPostPrefix = []byte("q")
 
 // AccountKeyFromPK creates the db key from a the account it belongs to and it's order
-func PostKeyFromAccount(acct []byte, num int) ([]byte, error) {
+func PostKeyFromAccount(acct []byte, num int64) ([]byte, error) {
 	if len(acct) < 16 {
 		return nil, errors.New("Invalid account key")
 	}
@@ -43,7 +43,7 @@ func (p *Post) Deserialize(data []byte) error {
 }
 
 // Save stores they data at the given address
-func (p Post) Save(store *merkle.IAVLTree, key []byte) (bool, error) {
+func (p Post) Save(store merkle.Tree, key []byte) (bool, error) {
 	data, err := p.Serialize()
 	if err != nil {
 		return false, err
@@ -56,7 +56,7 @@ func (p Post) Save(store *merkle.IAVLTree, key []byte) (bool, error) {
 
 // FindPostByAcctNum looks up by primary key (index scan)
 // Error on storage error, if no match, returns nil
-func FindPostByAcctNum(store *merkle.IAVLTree, acct []byte, num int) (*Post, error) {
+func FindPostByAcctNum(store merkle.Tree, acct []byte, num int64) (*Post, error) {
 	key, err := PostKeyFromAccount(acct, num)
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func FindPostByAcctNum(store *merkle.IAVLTree, acct []byte, num int) (*Post, err
 }
 
 // FindPostByKey looks up the post by the db key
-func FindPostByKey(store *merkle.IAVLTree, key []byte) (*Post, error) {
+func FindPostByKey(store merkle.Tree, key []byte) (*Post, error) {
 	_, data, exists := store.Get(key)
 	if !exists || data == nil {
 		return nil, nil
@@ -76,7 +76,7 @@ func FindPostByKey(store *merkle.IAVLTree, key []byte) (*Post, error) {
 }
 
 // FindPostsForAccount does a partial-index scan for all posts on a given account
-func FindPostsForAccount(store *merkle.IAVLTree, acct []byte) ([]*Post, error) {
+func FindPostsForAccount(store merkle.Tree, acct []byte) ([]*Post, error) {
 	res := []*Post{}
 	start, _ := PostKeyFromAccount(acct, 0)
 	end, err := PostKeyFromAccount(acct, 65000)

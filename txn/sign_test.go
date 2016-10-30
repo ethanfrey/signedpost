@@ -45,7 +45,7 @@ func TestSignSerialization(t *testing.T) {
 	privKey := crypto.GenPrivKeyEd25519()
 
 	// let's sign the action and make sure that works
-	action := AddEntryAction{Title: "First Post", Content: "Some text here"}
+	action := AddPostAction{Title: "First Post", Content: "Some text here"}
 	signed, err := SignAction(action, privKey)
 	require.Nil(err)
 
@@ -60,7 +60,7 @@ func TestSignSerialization(t *testing.T) {
 	assert.Equal(signed.GetSigner(), parsed.GetSigner())
 
 	// serialize a second object and make sure the same wire
-	a2 := AddEntryAction{Title: "First Post"}
+	a2 := AddPostAction{Title: "First Post"}
 	wire2, err := Send(a2, privKey)
 	require.Nil(err, "%+v", err)
 	assert.NotEqual(wire, wire2)

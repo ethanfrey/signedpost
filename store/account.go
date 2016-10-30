@@ -21,7 +21,7 @@ type Field struct {
 // This can be serialized with go-wire
 type Account struct {
 	Name       string // this is a name to search for
-	EntryCount int    // total number of entries (de-normalize for speed)
+	EntryCount int64  // total number of entries (de-normalize for speed)
 }
 
 // AccountKeyFromPK creates the db key from a public key
@@ -44,7 +44,7 @@ func (acct *Account) Deserialize(data []byte) error {
 }
 
 // Save stores they data at the given address
-func (acct Account) Save(store *merkle.IAVLTree, key []byte) (bool, error) {
+func (acct Account) Save(store merkle.Tree, key []byte) (bool, error) {
 	data, err := acct.Serialize()
 	if err != nil {
 		return false, err
@@ -57,7 +57,7 @@ func (acct Account) Save(store *merkle.IAVLTree, key []byte) (bool, error) {
 
 // FindAccountByPK looks up by primary key (index scan)
 // Error on storage error, if no match, returns nil
-func FindAccountByPK(store *merkle.IAVLTree, pk crypto.PubKey) (*Account, error) {
+func FindAccountByPK(store merkle.Tree, pk crypto.PubKey) (*Account, error) {
 	key, err := AccountKeyFromPK(pk)
 	if err != nil {
 		return nil, err
@@ -66,7 +66,7 @@ func FindAccountByPK(store *merkle.IAVLTree, pk crypto.PubKey) (*Account, error)
 }
 
 // FindAccountByKey looks up the account by the db key
-func FindAccountByKey(store *merkle.IAVLTree, key []byte) (*Account, error) {
+func FindAccountByKey(store merkle.Tree, key []byte) (*Account, error) {
 	_, data, exists := store.Get(key)
 	if !exists || data == nil {
 		return nil, nil
@@ -77,7 +77,7 @@ func FindAccountByKey(store *merkle.IAVLTree, key []byte) (*Account, error) {
 }
 
 // FindAccountByName does a table-scan over accounts for name match (later secondary index?)
-func FindAccountByName(store *merkle.IAVLTree, name string) (*Account, error) {
+func FindAccountByName(store merkle.Tree, name string) (*Account, error) {
 	var match *Account
 	acct := new(Account)
 	store.IterateRange(accountPrefix, endAccountPrefix, true, func(key []byte, value []byte) bool {

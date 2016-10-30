@@ -108,14 +108,14 @@ func TestAppendPost(t *testing.T) {
 	require.NotNil(pp)
 	assert.Equal(tx.Title, pp.Title)
 	assert.Equal(srv.GetHeight(), pp.PublishedBlock)
-	assert.Equal(1, pp.Number)
+	assert.EqualValues(1, pp.Number)
 
 	// get the account and check it was updated
 	aa, err := store.FindAccountByKey(tree, acctKey)
 	assert.Nil(err)
 	if assert.NotNil(aa) {
 		assert.Equal("Alice", aa.Name)
-		assert.Equal(1, aa.EntryCount)
+		assert.EqualValues(1, aa.EntryCount)
 	}
 
 	// add a second post and make sure we query both
@@ -125,14 +125,14 @@ func TestAppendPost(t *testing.T) {
 	}
 	r = srv.AppendPost(tx2, pub)
 	assert.False(r.IsErr(), "%+v", r.Error())
-	assert.Equal(3, tree.Size())
+	assert.EqualValues(3, tree.Size())
 
 	// get the account and check it was updated
 	aa, err = store.FindAccountByKey(tree, acctKey)
 	assert.Nil(err)
 	if assert.NotNil(aa) {
 		assert.Equal("Alice", aa.Name)
-		assert.Equal(2, aa.EntryCount)
+		assert.EqualValues(2, aa.EntryCount)
 	}
 
 	// let's check the post
@@ -140,7 +140,7 @@ func TestAppendPost(t *testing.T) {
 	require.Nil(err, "%+v", err)
 	require.Equal(2, len(posts))
 	assert.Equal(tx.Title, posts[0].Title)
-	assert.Equal(1, posts[0].Number)
+	assert.EqualValues(1, posts[0].Number)
 	assert.Equal(tx2.Title, posts[1].Title)
-	assert.Equal(2, posts[1].Number)
+	assert.EqualValues(2, posts[1].Number)
 }

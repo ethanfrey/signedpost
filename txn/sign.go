@@ -21,17 +21,9 @@ func init() {
 		wire.ConcreteType{crypto.SignatureEd25519{}, crypto.SignatureTypeEd25519},
 		wire.ConcreteType{crypto.SignatureSecp256k1{}, crypto.SignatureTypeSecp256k1},
 	)
-	wire.RegisterInterface(
-		struct{ SignedAction }{},
-		wire.ConcreteType{FFignedAction{}, 0x01},
-	)
-	wire.RegisterInterface(
-		struct{ ValidatedAction }{},
-		wire.ConcreteType{validatedAction{}, 0x01},
-	)
 }
 
-type SignedAction interface {
+type Signed interface {
 	GetSigner() crypto.PubKey
 	IsAnon() bool
 	GetActionData() []byte
@@ -39,75 +31,75 @@ type SignedAction interface {
 	Serialize() ([]byte, error)
 }
 
-type ValidatedAction interface {
-	SignedAction
+type Validated interface {
+	Signed
 	GetAction() Action
 }
 
-// validatedAction is returned after properly parsing a SignedAction and validating the signature
-type validatedAction struct {
+// ValidatedAction is returned after properly parsing a SignedAction and validating the signature
+type ValidatedAction struct {
 	action Action
 	valid  bool
 	SignedAction
 }
 
-func (v validatedAction) GetAction() Action {
+func (v ValidatedAction) GetAction() Action {
 	return v.action
 }
 
-func (v validatedAction) GetSigner() crypto.PubKey {
+func (v ValidatedAction) GetSigner() crypto.PubKey {
 	if !v.valid {
 		return nil
 	}
 	return v.SignedAction.GetSigner()
 }
 
-func (v validatedAction) IsAnon() bool {
+func (v ValidatedAction) IsAnon() bool {
 	return v.GetSigner() == nil
 }
 
-// FFignedAction contains a serialized action along with a signature for authorization
-type FFignedAction struct {
-	actionData []byte
-	signature  crypto.Signature
-	signer     crypto.PubKey
+// SignedAction contains a serialized action along with a signature for authorization
+type SignedAction struct {
+	ActionData []byte
+	Signature  crypto.Signature
+	Signer     crypto.PubKey
 }
 
-func (tx FFignedAction) GetSigner() crypto.PubKey {
-	return tx.signer
+func (tx SignedAction) GetSigner() crypto.PubKey {
+	return tx.Signer
 }
 
-func (tx FFignedAction) IsAnon() bool {
-	return tx.signer == nil
+func (tx SignedAction) IsAnon() bool {
+	return tx.Signer == nil
 }
 
-func (tx FFignedAction) GetActionData() []byte {
-	return tx.actionData
+func (tx SignedAction) GetActionData() []byte {
+	return tx.ActionData
 }
 
 // Serialize gives a wire version of this action, reversed by Deserialize
-func (tx FFignedAction) Serialize() ([]byte, error) {
+func (tx SignedAction) Serialize() ([]byte, error) {
 	return utils.ToBinary(tx)
 }
 
-// Deserialize will set the content of this FFignedAction to the bytes on the wire
-func (tx *FFignedAction) Deserialize(data []byte) error {
+// Deserialize will set the content of this SignedAction to the bytes on the wire
+func (tx *SignedAction) Deserialize(data []byte) error {
 	return utils.FromBinary(data, tx)
 }
 
 // Validate will deserialize the contained action, and validate the signature or return an error
-func (tx FFignedAction) Validate() (ValidatedAction, error) {
-	action := validatedAction{
+func (tx SignedAction) Validate() (ValidatedAction, error) {
+	action := ValidatedAction{
 		SignedAction: tx,
 	}
-	valid := tx.signer.VerifyBytes(tx.actionData, tx.signature)
+	valid := tx.Signer.VerifyBytes(tx.ActionData, tx.Signature)
 	if !valid {
 		return action, errors.New("Invalid signature")
 	}
 
 	var n int
 	var err error
-	buf := bytes.NewBuffer(tx.actionData)
+	buf := bytes.NewBuffer(tx.ActionData)
 	res := wire.ReadBinary(actionWrapper{}, buf, 0, &n, &err)
 	if err != nil {
 		return action, errors.Wrap(err, "Parsing valid action")
@@ -126,7 +118,7 @@ func (tx FFignedAction) Validate() (ValidatedAction, error) {
 func SignAction(action Action, privKey crypto.PrivKey) (SignedAction, error) {
 	var n int
 	var err error
-	res := FFignedAction{}
+	res := SignedAction{}
 	buf := new(bytes.Buffer)
 
 	wire.WriteBinary(actionWrapper{action}, buf, &n, &err)
@@ -134,9 +126,9 @@ func SignAction(action Action, privKey crypto.PrivKey) (SignedAction, error) {
 		return res, errors.Wrap(err, "Sign Action")
 	}
 
-	res.actionData = buf.Bytes()
-	res.signature = privKey.Sign(res.actionData)
-	res.signer = privKey.PubKey()
+	res.ActionData = buf.Bytes()
+	res.Signature = privKey.Sign(res.ActionData)
+	res.Signer = privKey.PubKey()
 	return res, nil
 }
 
@@ -151,10 +143,10 @@ func Send(action Action, privKey crypto.PrivKey) ([]byte, error) {
 
 // Receive will take some bytes, parse them, and validate the signature
 func Receive(data []byte) (ValidatedAction, error) {
-	tx := FFignedAction{}
+	tx := SignedAction{}
 	err := tx.Deserialize(data)
 	if err != nil {
-		return nil, err
+		return ValidatedAction{}, err
 	}
 	return tx.Validate()
 }

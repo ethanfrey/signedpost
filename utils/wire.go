@@ -2,7 +2,6 @@ package utils
 
 import (
 	"bytes"
-	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/tendermint/go-wire"
@@ -18,7 +17,6 @@ func ToBinary(obj interface{}) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "To Binary")
 	}
-	fmt.Printf("no errors: %d %v - %#v", *n, err, obj)
 	return w.Bytes(), nil
 }
 

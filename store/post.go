@@ -38,6 +38,17 @@ func PostKeyFromAccount(acct []byte, num int64) ([]byte, error) {
 	return output, nil
 }
 
+func AccountKeyFromPost(post []byte) ([]byte, error) {
+	if len(post) < 16 {
+		return nil, errors.New("Invalid account key")
+	}
+	if post[0] != postPrefix[0] || post[1] != accountPrefix[0] {
+		return nil, errors.New("Invalid key header")
+	}
+	return post[1 : len(post)-4], nil
+
+}
+
 // Serialize turns the structure into bytes for storage and signing
 func (p Post) Serialize() ([]byte, error) {
 	return utils.ToBinary(p)

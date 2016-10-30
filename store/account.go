@@ -1,6 +1,8 @@
 package store
 
 import (
+	"strings"
+
 	"github.com/ethanfrey/signedpost/utils"
 	"github.com/pkg/errors"
 
@@ -78,15 +80,42 @@ func FindAccountByKey(store merkle.Tree, key []byte) (*AccountField, error) {
 
 // FindAccountByName does a table-scan over accounts for name match (later secondary index?)
 func FindAccountByName(store merkle.Tree, name string) (*AccountField, error) {
-	var match *AccountField
+	filter := func(acct *Account) bool {
+		return acct.Name == name
+	}
+	res, err := filterAccounts(store, filter)
+	if len(res) == 0 {
+		return nil, err
+	}
+	return res[0], err
+}
+
+// SearchAccountByName checks all accounts for similar looking names
+func SearchAccountByName(store merkle.Tree, name string) ([]*AccountField, error) {
+	lname := strings.ToLower(name)
+	filter := func(acct *Account) bool {
+		return strings.Contains(strings.ToLower(acct.Name), lname)
+	}
+	return filterAccounts(store, filter)
+}
+
+// AllAccounts returns a list of all accounts
+func AllAccounts(store merkle.Tree) ([]*AccountField, error) {
+	filter := func(acct *Account) bool { return true }
+	return filterAccounts(store, filter)
+}
+
+// filterAccounts is a utility to get a subset of all accounts with a filter function
+func filterAccounts(store merkle.Tree, filter func(*Account) bool) ([]*AccountField, error) {
+	res := []*AccountField{}
 	acct := Account{}
 	store.IterateRange(accountPrefix, endAccountPrefix, true, func(key []byte, value []byte) bool {
 		err := acct.Deserialize(value)
-		if err == nil && acct.Name == name {
-			match = &AccountField{Key: key, Account: acct}
+		if err == nil && filter(&acct) {
+			res = append(res, &AccountField{Key: key, Account: acct})
 			return true
 		}
 		return false
 	})
-	return match, nil
+	return res, nil
 }

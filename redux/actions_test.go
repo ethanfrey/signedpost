@@ -1,10 +1,10 @@
-package txs
+package redux
 
 import (
 	"testing"
 
-	"github.com/ethanfrey/signedpost/db"
-	"github.com/ethanfrey/signedpost/models"
+	"github.com/ethanfrey/signedpost/store"
+	"github.com/ethanfrey/signedpost/txn"
 	"github.com/stretchr/testify/assert"
 	"github.com/tendermint/go-crypto"
 	merkle "github.com/tendermint/go-merkle"
@@ -17,10 +17,10 @@ func TestCreateUser(t *testing.T) {
 	tree := merkle.NewIAVLTree(0, nil) // in-memory
 	assert.Equal(0, tree.Size())
 
-	anon := &Context{
+	anon := &Service{
 		store: tree,
 	}
-	tx := models.CreateAccountAction{Name: "Alice"}
+	tx := txn.CreateAccountAction{Name: "Alice"}
 
 	// anon is prevented
 	r := CreateAccount(anon, tx)
@@ -28,7 +28,7 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(0, tree.Size())
 
 	// success for self-creation
-	ctx := &Context{
+	ctx := &Service{
 		store:  tree,
 		signer: alice.PubKey(),
 	}
@@ -37,26 +37,26 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(1, tree.Size())
 
 	// let's check this account by key
-	data, err := db.FindAccountByPK(tree, ctx.Signer())
+	data, err := store.FindAccountByPK(tree, ctx.Signer())
 	assert.Nil(err)
 	if assert.NotNil(data) {
 		assert.Equal(data.Name, "Alice")
 	}
 
 	// let's check this account by name
-	data, err = db.FindAccountByName(tree, "Alice")
+	data, err = store.FindAccountByName(tree, "Alice")
 	assert.Nil(err)
 	if assert.NotNil(data) {
 		assert.Equal(data.Name, "Alice")
 	}
 
 	// error by second name
-	tx2 := models.CreateAccountAction{Name: "Bob"}
+	tx2 := txn.CreateAccountAction{Name: "Bob"}
 	r = CreateAccount(ctx, tx)
 	assert.True(r.IsErr(), "%+v", r.Code)
 
 	// but bob can make a new account
-	ctx2 := &Context{
+	ctx2 := &Service{
 		store:  tree,
 		signer: bob.PubKey(),
 	}

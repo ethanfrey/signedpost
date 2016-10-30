@@ -5,3 +5,6 @@ vendor:
 
 test:
 	go test -p 1 `glide novendor`
+
+build:
+	go install `glide novendor`

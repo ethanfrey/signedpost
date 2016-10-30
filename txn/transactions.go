@@ -1,4 +1,4 @@
-package models
+package txn
 
 import "github.com/tendermint/go-wire"
 

@@ -1,19 +1,19 @@
-package txs
+package redux
 
 import (
-	"github.com/ethanfrey/signedpost/db"
-	"github.com/ethanfrey/signedpost/models"
+	"github.com/ethanfrey/signedpost/store"
+	"github.com/ethanfrey/signedpost/txn"
 	tmsp "github.com/tendermint/tmsp/types"
 )
 
 // CreateAccount creates a new account based on the signing public key
-func CreateAccount(ctx *Context, tx models.CreateAccountAction) tmsp.Result {
+func CreateAccount(ctx *Service, tx txn.CreateAccountAction) tmsp.Result {
 	if ctx.IsAnon() {
 		return tmsp.NewError(tmsp.CodeType_Unauthorized, "Must sign transaction")
 	}
 
 	// make sure none with this name or pk already....
-	exists, err := db.FindAccountByPK(ctx.GetDB(), ctx.Signer())
+	exists, err := store.FindAccountByPK(ctx.GetDB(), ctx.Signer())
 	if err != nil {
 		return tmsp.NewError(tmsp.CodeType_BaseInvalidInput, err.Error())
 	}
@@ -22,7 +22,7 @@ func CreateAccount(ctx *Context, tx models.CreateAccountAction) tmsp.Result {
 			"Account exists for this public key")
 	}
 
-	exists, err = db.FindAccountByName(ctx.GetDB(), tx.Name)
+	exists, err = store.FindAccountByName(ctx.GetDB(), tx.Name)
 	if err != nil {
 		return tmsp.NewError(tmsp.CodeType_BaseInvalidInput, err.Error())
 	}
@@ -32,11 +32,11 @@ func CreateAccount(ctx *Context, tx models.CreateAccountAction) tmsp.Result {
 	}
 
 	// all safe, go save it
-	account := db.Account{
+	account := store.Account{
 		Name:       tx.Name,
 		EntryCount: 0,
 	}
-	key, _ := db.AccountKeyFromPK(ctx.Signer())
+	key, _ := store.AccountKeyFromPK(ctx.Signer())
 	account.Save(ctx.GetDB(), key)
 	// return the new pk as response
 	return tmsp.NewResultOK(key, "")

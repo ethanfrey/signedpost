@@ -1,4 +1,4 @@
-package db
+package store
 
 // Entry represents one verifiably immutable blog entry (so no typos ;)
 type Entry struct {

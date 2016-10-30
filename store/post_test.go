@@ -58,9 +58,10 @@ func TestPost(t *testing.T) {
 	assertPost(t, &p, first)
 }
 
-func assertPost(t *testing.T, post, match *Post) {
+func assertPost(t *testing.T, post *Post, match *PostField) {
 	assert := assert.New(t)
 	if assert.NotNil(post) && assert.NotNil(match) {
+		assert.NotNil(match.Key)
 		assert.Equal(post.Title, match.Title)
 		assert.Equal(post.Number, match.Number)
 		assert.Equal(post.Content, match.Content)

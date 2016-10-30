@@ -65,9 +65,10 @@ func TestAccount(t *testing.T) {
 	assertAccount(t, &acct, match)
 }
 
-func assertAccount(t *testing.T, acct, match *Account) {
+func assertAccount(t *testing.T, acct *Account, match *AccountField) {
 	assert := assert.New(t)
 	if assert.NotNil(acct) && assert.NotNil(match) {
+		assert.NotNil(match.Key)
 		assert.Equal(acct.Name, match.Name)
 		assert.Equal(acct.EntryCount, match.EntryCount)
 	}

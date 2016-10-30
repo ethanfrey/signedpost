@@ -9,6 +9,12 @@ import (
 	merkle "github.com/tendermint/go-merkle"
 )
 
+// PostField is the post along with the key for lookup
+type PostField struct {
+	Key []byte
+	Post
+}
+
 // Post represents one verifiably immutable blog entry (so no typos ;)
 type Post struct {
 	Number         int64
@@ -56,7 +62,7 @@ func (p Post) Save(store merkle.Tree, key []byte) (bool, error) {
 
 // FindPostByAcctNum looks up by primary key (index scan)
 // Error on storage error, if no match, returns nil
-func FindPostByAcctNum(store merkle.Tree, acct []byte, num int64) (*Post, error) {
+func FindPostByAcctNum(store merkle.Tree, acct []byte, num int64) (*PostField, error) {
 	key, err := PostKeyFromAccount(acct, num)
 	if err != nil {
 		return nil, err
@@ -65,19 +71,19 @@ func FindPostByAcctNum(store merkle.Tree, acct []byte, num int64) (*Post, error)
 }
 
 // FindPostByKey looks up the post by the db key
-func FindPostByKey(store merkle.Tree, key []byte) (*Post, error) {
+func FindPostByKey(store merkle.Tree, key []byte) (*PostField, error) {
 	_, data, exists := store.Get(key)
 	if !exists || data == nil {
 		return nil, nil
 	}
 	p := Post{}
 	err := p.Deserialize(data)
-	return &p, err
+	return &PostField{Key: key, Post: p}, err
 }
 
 // FindPostsForAccount does a partial-index scan for all posts on a given account
-func FindPostsForAccount(store merkle.Tree, acct []byte) ([]*Post, error) {
-	res := []*Post{}
+func FindPostsForAccount(store merkle.Tree, acct []byte) ([]*PostField, error) {
+	res := []*PostField{}
 	start, _ := PostKeyFromAccount(acct, 0)
 	end, err := PostKeyFromAccount(acct, 65000)
 	if err != nil {
@@ -89,7 +95,7 @@ func FindPostsForAccount(store merkle.Tree, acct []byte) ([]*Post, error) {
 		if err != nil {
 			return true
 		}
-		res = append(res, &p)
+		res = append(res, &PostField{Key: key, Post: p})
 		return false
 	})
 	return res, err

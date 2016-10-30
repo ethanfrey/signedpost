@@ -11,10 +11,10 @@ import (
 var accountPrefix = []byte("u")
 var endAccountPrefix = []byte("v")
 
-// Field represents the Key, Value pair for a leaf node
-type Field struct {
-	Key   []byte
-	Value []byte
+// AccountField is the account along with the key for lookup
+type AccountField struct {
+	Key []byte
+	Account
 }
 
 // Account is a named account that can publish blog entries
@@ -57,7 +57,7 @@ func (acct Account) Save(store merkle.Tree, key []byte) (bool, error) {
 
 // FindAccountByPK looks up by primary key (index scan)
 // Error on storage error, if no match, returns nil
-func FindAccountByPK(store merkle.Tree, pk crypto.PubKey) (*Account, error) {
+func FindAccountByPK(store merkle.Tree, pk crypto.PubKey) (*AccountField, error) {
 	key, err := AccountKeyFromPK(pk)
 	if err != nil {
 		return nil, err
@@ -66,24 +66,24 @@ func FindAccountByPK(store merkle.Tree, pk crypto.PubKey) (*Account, error) {
 }
 
 // FindAccountByKey looks up the account by the db key
-func FindAccountByKey(store merkle.Tree, key []byte) (*Account, error) {
+func FindAccountByKey(store merkle.Tree, key []byte) (*AccountField, error) {
 	_, data, exists := store.Get(key)
 	if !exists || data == nil {
 		return nil, nil
 	}
 	acct := Account{}
 	err := acct.Deserialize(data)
-	return &acct, err
+	return &AccountField{Key: key, Account: acct}, err
 }
 
 // FindAccountByName does a table-scan over accounts for name match (later secondary index?)
-func FindAccountByName(store merkle.Tree, name string) (*Account, error) {
-	var match *Account
-	acct := new(Account)
+func FindAccountByName(store merkle.Tree, name string) (*AccountField, error) {
+	var match *AccountField
+	acct := Account{}
 	store.IterateRange(accountPrefix, endAccountPrefix, true, func(key []byte, value []byte) bool {
 		err := acct.Deserialize(value)
 		if err == nil && acct.Name == name {
-			match = acct
+			match = &AccountField{Key: key, Account: acct}
 			return true
 		}
 		return false

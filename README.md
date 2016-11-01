@@ -14,6 +14,41 @@ An old-fashioned version was to send yourself a sealed letter and use the stamp 
 on the sealed envelope as proof as to the date of the document.  This is a high-tech version for
 signing your post. 
 
+## Quick Start
+
+First, make sure to compile the apps
+
+```
+go install github.com/tendermint/tendermint/cmd/tendermint
+go install github.com/ethanfrey/signedpost/cmd/sp-server
+go install github.com/ethanfrey/signedpost/cmd/sp-cli
+```
+
+In one shell run:
+```
+sp-server
+```
+
+In another shell run:
+```
+tendermint init
+tendermint node
+```
+
+And in a final (client) shell, run:
+```
+# make sure the server works...
+curl -XGET localhost:54321/status
+curl -XGET localhost:54321/tndr/block?height=22
+
+# post some data
+sp-cli --key sample-key --name Fred
+# cut paste the output and...
+curl -XPOST http://localhost:54321/tndr/tx -d '{"tx":"..."}'
+curl -XGET localhost:54321/accounts
+curl -XGET localhost:54321/accounts?username=Fre
+```
+
 ## Data Storage
 
 There are two types in the database.  

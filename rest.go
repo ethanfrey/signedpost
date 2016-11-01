@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"net/http"
 
+	"github.com/ethanfrey/signedpost/utils"
 	"github.com/ethanfrey/signedpost/view"
 	"github.com/gorilla/mux"
 )
@@ -21,7 +22,7 @@ func (app *Application) SearchAccounts(rw http.ResponseWriter, r *http.Request) 
 	} else {
 		accts, err = view.AccountByName(app.commited.GetDB(), name)
 	}
-	view.RenderQuery(rw, accts, err)
+	utils.RenderQuery(rw, accts, err)
 }
 
 func (app *Application) AccountByKey(rw http.ResponseWriter, r *http.Request) {
@@ -31,7 +32,7 @@ func (app *Application) AccountByKey(rw http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		acct, err = view.AccountByKey(app.commited.GetDB(), key)
 	}
-	view.RenderQuery(rw, acct, err)
+	utils.RenderQuery(rw, acct, err)
 }
 
 func (app *Application) PostByKey(rw http.ResponseWriter, r *http.Request) {
@@ -41,7 +42,7 @@ func (app *Application) PostByKey(rw http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		post, err = view.PostByKey(app.commited.GetDB(), key)
 	}
-	view.RenderQuery(rw, post, err)
+	utils.RenderQuery(rw, post, err)
 }
 
 func (app *Application) PostsForAccount(rw http.ResponseWriter, r *http.Request) {
@@ -51,7 +52,7 @@ func (app *Application) PostsForAccount(rw http.ResponseWriter, r *http.Request)
 	if err == nil {
 		posts, err = view.PostsForAccount(app.commited.GetDB(), key)
 	}
-	view.RenderQuery(rw, posts, err)
+	utils.RenderQuery(rw, posts, err)
 }
 
 func (app *Application) AddQueryRoutes(r *mux.Router) {

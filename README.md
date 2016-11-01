@@ -54,12 +54,12 @@ a native app version, while the web version would allow easy browsing.
 
 Custom data-aware endpoints:
 
-* `POST /crypt/tx` allows one to post a new transaction to the engine (proxy to `broadcast_tx_sync`)
 * `GET /crypt/accounts/{id}` gets a merkle-proof of the account details (including number of posts)
 * `GET /crypt/posts/{pid}` gets a merkle-proof of the post details (including block height it was added)
 
 Proxies to tendermint core for validation:
 
+* `POST /tndr/tx` allows one to post a new transaction to the engine (proxy to `broadcast_tx_sync`).  Post must look like `{"tx": "0123beef"}` hex-encoded form of the transaction
 * `GET /tndr/block?height={h}` gets the given block
 * `GET /tndr/blockchain?minHeight={min}&maxHeight={max}` gets a list of blocks
 * `GET /tndr/status` gets the current blockchain status
@@ -72,3 +72,24 @@ along with a golang cli tool to create accounts and add posts.
 
 The second client will either be a more complex app (web or mobile) that uses the
 crypto API to securely post data and validate and timestamp any claims.
+
+# Dev Zone
+
+This info is just for people wising to understand and modify this code.  Not for running the app.
+
+## Package Layout
+
+The top level contains the server objects, which are constructed from the pieces below.  The packages have the following responsibilities:
+
+* txn - (de)serialization, signing, and validating signatures for all transactions that can modify state, used by client to construct, and server to verify
+* store - the actual binary structures we store internally, along with functions for querying and modifying the data store
+* redux - this holds the reducer, which applies `txn` Actions to the Data `store`.  The main class here is `Service`, which wraps a `go-merkle` tree
+* view - these are query functions and http helpers for reading the state of the app.
+* utils - common utilities (may disappear later if not really needed)
+* cmd - all commands (main packages)
+
+Top level package:
+
+* `application.go` - Implementation of a TMSP application
+* `rest.go` - Implementation of a JSON REST API to view the data
+* `chain.go` - Implementation of a tendermint proxy, allowing writing transactions to the blockchain, and querying the blockchain state.

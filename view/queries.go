@@ -1,10 +1,6 @@
 package view
 
 import (
-	"encoding/json"
-	"fmt"
-	"net/http"
-
 	"github.com/pkg/errors"
 
 	"github.com/ethanfrey/signedpost/store"
@@ -60,19 +56,4 @@ func PostByKey(tree merkle.Tree, key []byte) (*Post, error) {
 		return nil, errors.New("Not Found")
 	}
 	return RenderPost(post), nil
-}
-
-// RenderQuery writes the output of any of the above issues to the client
-func RenderQuery(rw http.ResponseWriter, res interface{}, err error) {
-	var data []byte
-	if err == nil {
-		data, err = json.Marshal(res)
-	}
-	if err != nil {
-		rw.WriteHeader(400)
-		rw.Write([]byte(fmt.Sprintf("%+v", err)))
-		return
-	}
-	rw.Header().Set("Content-Type", "application/json")
-	rw.Write(data)
 }

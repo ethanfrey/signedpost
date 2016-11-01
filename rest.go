@@ -55,21 +55,10 @@ func (app *Application) PostsForAccount(rw http.ResponseWriter, r *http.Request)
 	utils.RenderQuery(rw, posts, err)
 }
 
+// AddQueryRoutes add all routes for reading the app state (unsigned)
 func (app *Application) AddQueryRoutes(r *mux.Router) {
 	r.HandleFunc("/accounts", app.SearchAccounts).Methods("GET")
 	r.HandleFunc("/accounts/{acct}", app.AccountByKey).Methods("GET")
 	r.HandleFunc("/accounts/{acct}/posts", app.PostsForAccount).Methods("GET")
 	r.HandleFunc("/posts/{post}", app.PostByKey).Methods("GET")
-}
-
-// MakeServer prepares an http server to handle rest queries
-// Just call s.ListenAndServe()
-func (app *Application) MakeServer(listen string) *http.Server {
-	r := mux.NewRouter()
-	app.AddQueryRoutes(r)
-	s := &http.Server{
-		Addr:    listen,
-		Handler: r,
-	}
-	return s
 }

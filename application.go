@@ -13,7 +13,8 @@ type Application struct {
 	check    *redux.Service
 }
 
-func New(tree merkle.Tree) *Application {
+// NewApp creates a new tmsp application
+func NewApp(tree merkle.Tree) *Application {
 	a := Application{
 		commited: redux.New(tree, 0),
 	}

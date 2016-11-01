@@ -7,3 +7,4 @@ import:
 - package: github.com/tendermint/tmsp
   subpackages:
   - types
+- package: github.com/ethanfrey/tenderize

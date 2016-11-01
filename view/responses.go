@@ -2,7 +2,7 @@ package view
 
 // Account is the json object we return for one account
 type Account struct {
-	ID        []byte `json:"id"`
+	ID        string `json:"id"`
 	Name      string `json:"name"`
 	PostCount int64  `json:"posts"`
 }
@@ -15,8 +15,8 @@ type AccountList struct {
 
 // Post is the json object we return for one post
 type Post struct {
-	ID             []byte `json:"id"`
-	AccountID      []byte `json:"account"`
+	ID             string `json:"id"`
+	AccountID      string `json:"account"`
 	Number         int64  `json:"number"`
 	PublishedBlock uint64 `json:"published_block"`
 	Title          string `json:"title"`

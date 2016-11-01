@@ -1,6 +1,10 @@
 package view
 
-import "github.com/ethanfrey/signedpost/store"
+import (
+	"encoding/hex"
+
+	"github.com/ethanfrey/signedpost/store"
+)
 
 func RenderPost(post *store.PostField) *Post {
 	acct, err := store.AccountKeyFromPost(post.Key)
@@ -8,8 +12,8 @@ func RenderPost(post *store.PostField) *Post {
 		panic(err)
 	}
 	return &Post{
-		ID:             post.Key,
-		AccountID:      acct,
+		ID:             hex.EncodeToString(post.Key),
+		AccountID:      hex.EncodeToString(acct),
 		Number:         post.Number,
 		PublishedBlock: post.PublishedBlock,
 		Title:          post.Title,
@@ -30,7 +34,7 @@ func RenderPostList(posts []*store.PostField) *PostList {
 
 func RenderAccount(acct *store.AccountField) *Account {
 	return &Account{
-		ID:        acct.Key,
+		ID:        hex.EncodeToString(acct.Key),
 		Name:      acct.Name,
 		PostCount: acct.EntryCount,
 	}

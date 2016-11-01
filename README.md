@@ -47,7 +47,12 @@ sp-cli --key sample-key --name Fred
 curl -XPOST http://localhost:54321/tndr/tx -d '{"tx":"..."}'
 curl -XGET localhost:54321/accounts
 curl -XGET localhost:54321/accounts?username=Fre
+# use the id you get above
+curl -XGET localhost:54321/accounts/757f939c2ccbabd93e8147593b7c1c4c2995a61434
 ```
+
+TODO: add tx signing for posts, demo that
+TODO: web interface to make this reading and writing much easier
 
 ## Data Storage
 

@@ -2,17 +2,17 @@
 
 Demo app using the tendermint blockchain.
 
-This allows people to sign posts using their public key.  In the most banal sense, this is an 
+This allows people to sign posts using their public key.  In the most banal sense, this is an
 immutible blogging platform on the blockchain.  And as such, serve as a demo for building an
 interactive web-app based on tendermint technology.
 
-However, it is also designed to provide legally valid proof of the existence of any document 
-at a given time, backed by the validation of a shared blockchain. When combined with proof of 
+However, it is also designed to provide legally valid proof of the existence of any document
+at a given time, backed by the validation of a shared blockchain. When combined with proof of
 real-world identity tied to a public-key, this could actually be a useful tool.
 
 An old-fashioned version was to send yourself a sealed letter and use the stamp from the post office
 on the sealed envelope as proof as to the date of the document.  This is a high-tech version for
-signing your post. 
+signing your post.
 
 ## Quick Start
 
@@ -56,7 +56,7 @@ TODO: web interface to make this reading and writing much easier
 
 ## Data Storage
 
-There are two types in the database.  
+There are two types in the database.
 
 *Account* which connects a human readable username with a public key in a first-come, first-serve basis.
 This name cannot be changed.  One can only add posts to an account.
@@ -133,3 +133,38 @@ Top level package:
 * `application.go` - Implementation of a TMSP application
 * `rest.go` - Implementation of a JSON REST API to view the data
 * `chain.go` - Implementation of a tendermint proxy, allowing writing transactions to the blockchain, and querying the blockchain state.
+
+## Roadmap
+
+### v0.1.0 (in progress)
+
+* Implementation of users and posts in tmsp app
+* Implementation of json api to view data
+* Go cli to generate, sign, and submit valid transactions
+* Javascript client (react) to display state via json api
+
+### v0.2.0 (planned)
+
+* Android native app capable of submitting transactions as well as viewing state
+* Websockets to "watch" a query for live updates (auto-update on post by a given user)
+* Integrate live update in both clients
+
+### Future ideas
+
+* Protocol buffer instead of go-wire and portable crypto libraries
+  * Easier for signing/verifying with no-golang clients
+* Validating "light-client" features
+  * Get and verify proof for a given state
+  * Verify block headers
+  * Display and validate block where post was submitted (audit trail)
+* iOS app?
+* Desktop app?
+* Multiple content-types of post
+  * Encoded text, timestamp validated, key may be released much later to publish
+  * Special data fields with app-specific meaning?
+
+## Licensing
+
+Please note that all code here is currently under the GPLv3.
+
+It is intended as an example app, and a free place to work on best practices without commercial interest. All contributions (and public forks) are welcome in order to evolve best practices in tendermint apps.  However, if you wish to integrate any of this code in a commercial application, please check with the author first.

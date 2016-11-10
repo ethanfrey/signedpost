@@ -16,7 +16,7 @@ func TestApplication(t *testing.T) {
 	earl := crypto.GenPrivKeyEd25519()
 	tree := merkle.NewIAVLTree(0, nil) // in-memory
 
-	app := New(tree)
+	app := NewApp(tree)
 	// make sure initial hash is nil
 	assert.Nil(app.Commit().Data)
 

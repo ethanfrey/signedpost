@@ -98,11 +98,11 @@ func TestMultipleAccounts(t *testing.T) {
 	assertAccount(t, alice, accts[ai])
 	assertAccount(t, bob, accts[bi])
 
-	// ano one more makes three...
+	// and one more makes three...
 	_, _ = makeAccount(t, tree, "Carl")
 	accts, err = AllAccounts(tree)
 	require.Nil(err)
-	assert.Equal(3, len(accts))
+	require.Equal(3, len(accts))
 }
 
 func makeAccount(t *testing.T, tree merkle.Tree, name string) (key []byte, acct *Account) {

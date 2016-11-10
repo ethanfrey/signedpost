@@ -113,7 +113,6 @@ func filterAccounts(store merkle.Tree, filter func(*Account) bool) ([]*AccountFi
 		err := acct.Deserialize(value)
 		if err == nil && filter(&acct) {
 			res = append(res, &AccountField{Key: key, Account: acct})
-			return true
 		}
 		return false
 	})

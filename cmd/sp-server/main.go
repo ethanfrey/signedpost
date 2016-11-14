@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ethanfrey/signedpost"
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
+
 	"github.com/tendermint/go-merkle"
 	"github.com/tendermint/tmsp/server"
+
+	"github.com/ethanfrey/signedpost"
 )
 
 // MakeServer creates an http server
@@ -16,9 +19,11 @@ func MakeServer(listen string, app *signedpost.Application, proxy signedpost.Pro
 	r := mux.NewRouter()
 	app.AddQueryRoutes(r)
 	proxy.AddChainRoutes(r)
+	wrap := cors.Default().Handler(r)
+
 	s := &http.Server{
 		Addr:    listen,
-		Handler: r,
+		Handler: wrap,
 	}
 	return s
 

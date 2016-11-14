@@ -1,5 +1,5 @@
-hash: ffa8149f6de6041b5df479dac21ffd666c8fa5f2747fa599b17afb07ae783731
-updated: 2016-11-01T17:18:14.231294205+01:00
+hash: 9ce4b994778077d20734ce50b4b57627960ee7b11d435c2b831fdb3c51bdeb1b
+updated: 2016-11-14T21:41:29.555316008+01:00
 imports:
 - name: github.com/btcsuite/btcd
   version: 83432785f3df1f0b6f8e6926dfe0987a34ea5b3c
@@ -33,6 +33,10 @@ imports:
   version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
+- name: github.com/rs/cors
+  version: a62a804a8a009876ca59105f7899938a1349f4b3
+- name: github.com/rs/xhandler
+  version: ed27b6fd65218132ee50cd95f38474a3d8a2cd12
 - name: github.com/syndtr/goleveldb
   version: 6b4daa5362b502898ddf367c5c11deb9e7a5c727
   subpackages:
@@ -93,6 +97,7 @@ imports:
 - name: github.com/tendermint/tmsp
   version: ab98bffbb1a9d8e1df9fb673406f892ac7f8a414
   subpackages:
+  - server
   - types
 - name: golang.org/x/crypto
   version: 81372b2fc2f10bef2a7f338da115c315a56b2726

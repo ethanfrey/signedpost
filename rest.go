@@ -4,9 +4,10 @@ import (
 	"encoding/hex"
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/ethanfrey/signedpost/utils"
 	"github.com/ethanfrey/signedpost/view"
-	"github.com/gorilla/mux"
 )
 
 /*

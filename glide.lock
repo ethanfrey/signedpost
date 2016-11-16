@@ -1,5 +1,5 @@
-hash: 9ce4b994778077d20734ce50b4b57627960ee7b11d435c2b831fdb3c51bdeb1b
-updated: 2016-11-14T21:41:29.555316008+01:00
+hash: 39a4acd2d6e0a12df5541e68bdb8ca367ab818e1a022b4186a9310c6790f0e2c
+updated: 2016-11-16T19:02:15.388851702+01:00
 imports:
 - name: github.com/btcsuite/btcd
   version: 83432785f3df1f0b6f8e6926dfe0987a34ea5b3c
@@ -135,6 +135,8 @@ imports:
   - naming
   - peer
   - transport
+- name: gopkg.in/alecthomas/kingpin.v2
+  version: e9044be3ab2a8e11d4e1f418d12f0790d57e8d70
 testImports:
 - name: github.com/davecgh/go-spew
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d

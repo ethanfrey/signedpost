@@ -14,7 +14,7 @@ func RenderQuery(rw http.ResponseWriter, res interface{}, err error) {
 	}
 	if err != nil {
 		rw.WriteHeader(400)
-		rw.Write([]byte(fmt.Sprintf("%+v", err)))
+		rw.Write([]byte(fmt.Sprintf("%v", err)))
 		return
 	}
 	rw.Header().Set("Content-Type", "application/json")

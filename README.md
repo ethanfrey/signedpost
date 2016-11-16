@@ -31,28 +31,52 @@ sp-server
 
 In another shell run:
 ```
+# this is to keep us clean frm any other demos...
+export TMROOT=`pwd`/tmdata
+rm -rf $TMROOT
+
+# and now start a fresh chain for this server
 tendermint init
 tendermint node
 ```
 
 And in a final (client) shell, run:
 ```
-# make sure the server works...
-curl -XGET localhost:54321/status
-curl -XGET localhost:54321/tndr/block?height=22
+# 1. make sure the server and client work...
 
-# post some data
-sp-cli --key sample-key --name Fred
-# cut paste the output and...
-curl -XPOST http://localhost:54321/tndr/tx -d '{"tx":"..."}'
-curl -XGET localhost:54321/accounts
-curl -XGET localhost:54321/accounts?username=Fre
+curl -XGET localhost:54321/tndr/status
+curl -XGET localhost:54321/tndr/block?height=22
+sp-cli --help
+
+# 2. create some accounts
+sp-cli --key sample.key account Fred
+# This gives Fred's ID
+sp-cli --key sample.key account John
+# This returns an error
+sp-cli --key alice.key account Alice
+# a new id for alice -> ALICE_ID
+
+# 3. query these accounts
+curl -XGET localhost:54321/accounts | jq
+curl -XGET localhost:54321/accounts?username=Fre |jq
 # use the id you get above
-curl -XGET localhost:54321/accounts/757f939c2ccbabd93e8147593b7c1c4c2995a61434
+curl -XGET localhost:54321/accounts/$ALICE_ID
+
+# 4. add some posts
+sp-cli --key alice.key post "Hello world" "Life is good!"
+sp-cli --key alice.key post "One more time" "For good luck"
+# -> store post id as POST_ID
+
+# 5. check the update
+curl -XGET localhost:54321/posts/$POST_ID | jq
+curl -XGET localhost:54321/accounts?username=Al | jq
+curl -XGET localhost:54321/accounts/$ALICE_ID/posts | jq
 ```
 
-TODO: add tx signing for posts, demo that
-TODO: web interface to make this reading and writing much easier
+Okay, now this worked.  But json is kinda boring...  Well, leave your tendermint app running, and open up yet another shell.
+
+Go to github to find my example [react frontend viewer](https://github.com/ethanfrey/signedpost-react). You need npm locally, the rest of the instructions are in that repo.
+(Note that only the cli can actually sign transactions, as I think giving your private key to the browser defeats the security of the blockchain)
 
 ## Data Storage
 

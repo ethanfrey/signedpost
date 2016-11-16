@@ -10,3 +10,5 @@ import:
 - package: github.com/ethanfrey/tenderize
 - package: github.com/rs/cors
   version: ^1.0.0
+- package: gopkg.in/alecthomas/kingpin.v2
+  version: ^2.2.3

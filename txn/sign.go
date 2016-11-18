@@ -1,8 +1,6 @@
 package txn
 
 import (
-	"bytes"
-
 	"github.com/ethanfrey/signedpost/utils"
 	"github.com/pkg/errors"
 	crypto "github.com/tendermint/go-crypto"
@@ -97,17 +95,10 @@ func (tx SignedAction) Validate() (ValidatedAction, error) {
 		return action, errors.New("Invalid signature")
 	}
 
-	var n int
-	var err error
-	buf := bytes.NewBuffer(tx.ActionData)
-	res := wire.ReadBinary(actionWrapper{}, buf, 0, &n, &err)
+	wrap := actionWrapper{}
+	err := utils.FromBinary(tx.ActionData, &wrap)
 	if err != nil {
-		return action, errors.Wrap(err, "Parsing valid action")
-	}
-
-	wrap, ok := res.(actionWrapper)
-	if !ok {
-		return action, errors.New("Data is not action type")
+		return action, err
 	}
 	action.action = wrap.Action
 	action.valid = true
@@ -115,18 +106,11 @@ func (tx SignedAction) Validate() (ValidatedAction, error) {
 }
 
 // SignAction will serialize the action and sign it with your key
-func SignAction(action Action, privKey crypto.PrivKey) (SignedAction, error) {
-	var n int
-	var err error
-	res := SignedAction{}
-	buf := new(bytes.Buffer)
-
-	wire.WriteBinary(actionWrapper{action}, buf, &n, &err)
+func SignAction(action Action, privKey crypto.PrivKey) (res SignedAction, err error) {
+	res.ActionData, err = utils.ToBinary(actionWrapper{action})
 	if err != nil {
-		return res, errors.Wrap(err, "Sign Action")
+		return res, err
 	}
-
-	res.ActionData = buf.Bytes()
 	res.Signature = privKey.Sign(res.ActionData)
 	res.Signer = privKey.PubKey()
 	return res, nil

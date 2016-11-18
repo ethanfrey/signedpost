@@ -72,11 +72,12 @@ func (app *Application) InitChain(validators []*tmsp.Validator) {}
 
 // BeginBlock signals the beginning of a block, update service so we tag posts properly
 func (app *Application) BeginBlock(height uint64) {
-	app.commited.SetHeight(height)
+	// TODO: this is never called in the current code, so we make do with EndBlock, implying a begin block
 }
 
 // EndBlock signals the end of a block, ignored now
 // diffs: changed validators from app to TendermintCore
 func (app *Application) EndBlock(height uint64) (diffs []*tmsp.Validator) {
+	app.commited.SetHeight(height + 1)
 	return nil
 }

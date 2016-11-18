@@ -20,7 +20,8 @@ func TestApplication(t *testing.T) {
 	// make sure initial hash is nil
 	assert.Nil(app.Commit().Data)
 
-	app.BeginBlock(2)
+	// TODO: use BeginBlock(2), when that works...
+	app.EndBlock(1)
 	utx := txn.CreateAccountAction{Name: "Grey"}
 	data, err := txn.Send(utx, earl)
 	require.Nil(err, "%+v", err)

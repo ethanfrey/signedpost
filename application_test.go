@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	crypto "github.com/tendermint/go-crypto"
 	merkle "github.com/tendermint/go-merkle"
+	tmsp "github.com/tendermint/tmsp/types"
 )
 
 func TestApplication(t *testing.T) {
@@ -20,7 +21,7 @@ func TestApplication(t *testing.T) {
 	// make sure initial hash is nil
 	assert.Nil(app.Commit().Data)
 
-	app.BeginBlock(2)
+	app.BeginBlock(nil, &tmsp.Header{Height: 2})
 	utx := txn.CreateAccountAction{Name: "Grey"}
 	data, err := txn.Send(utx, earl)
 	require.Nil(err, "%+v", err)

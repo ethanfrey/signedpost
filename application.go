@@ -23,8 +23,8 @@ func NewApp(tree merkle.Tree) *Application {
 }
 
 // Info is a placeholder
-func (app *Application) Info() string {
-	return app.commited.Info()
+func (app *Application) Info() (string, *tmsp.TMSPInfo, *tmsp.LastBlockInfo, *tmsp.ConfigInfo) {
+	return app.commited.Info(), nil, nil, nil
 }
 
 // SetOption is ignored for now
@@ -71,8 +71,8 @@ func (app *Application) Commit() tmsp.Result {
 func (app *Application) InitChain(validators []*tmsp.Validator) {}
 
 // BeginBlock signals the beginning of a block, update service so we tag posts properly
-func (app *Application) BeginBlock(height uint64) {
-	app.commited.SetHeight(height)
+func (app *Application) BeginBlock(hash []byte, header *tmsp.Header) {
+	app.commited.SetHeight(uint64(header.Height))
 }
 
 // EndBlock signals the end of a block, ignored now

@@ -15,7 +15,7 @@ import (
 // A stripped copy of the remoteClient that makes
 // synchronous calls using grpc
 type grpcClient struct {
-	QuitService
+	BaseService
 	mustConnect bool
 
 	client types.TMSPApplicationClient
@@ -31,7 +31,7 @@ func NewGRPCClient(addr string, mustConnect bool) (*grpcClient, error) {
 		addr:        addr,
 		mustConnect: mustConnect,
 	}
-	cli.QuitService = *NewQuitService(nil, "grpcClient", cli)
+	cli.BaseService = *NewBaseService(nil, "grpcClient", cli)
 	_, err := cli.Start() // Just start it, it's confusing for callers to remember to start.
 	return cli, err
 }
@@ -41,7 +41,7 @@ func dialerFunc(addr string, timeout time.Duration) (net.Conn, error) {
 }
 
 func (cli *grpcClient) OnStart() error {
-	cli.QuitService.OnStart()
+	cli.BaseService.OnStart()
 RETRY_LOOP:
 
 	for {
@@ -73,7 +73,7 @@ RETRY_LOOP:
 }
 
 func (cli *grpcClient) OnStop() {
-	cli.QuitService.OnStop()
+	cli.BaseService.OnStop()
 	cli.mtx.Lock()
 	defer cli.mtx.Unlock()
 	// TODO: how to close conn? its not a net.Conn and grpc doesn't expose a Close()
@@ -200,8 +200,8 @@ func (cli *grpcClient) InitChainAsync(validators []*types.Validator) *ReqRes {
 	return cli.finishAsyncCall(req, &types.Response{&types.Response_InitChain{res}})
 }
 
-func (cli *grpcClient) BeginBlockAsync(height uint64) *ReqRes {
-	req := types.ToRequestBeginBlock(height)
+func (cli *grpcClient) BeginBlockAsync(hash []byte, header *types.Header) *ReqRes {
+	req := types.ToRequestBeginBlock(hash, header)
 	res, err := cli.client.BeginBlock(context.Background(), req.GetBeginBlock(), grpc.FailFast(true))
 	if err != nil {
 		cli.StopForError(err)
@@ -262,13 +262,13 @@ func (cli *grpcClient) FlushSync() error {
 	return nil
 }
 
-func (cli *grpcClient) InfoSync() (res types.Result) {
+func (cli *grpcClient) InfoSync() (types.Result, *types.TMSPInfo, *types.LastBlockInfo, *types.ConfigInfo) {
 	reqres := cli.InfoAsync()
 	if res := cli.checkErrGetResult(); res.IsErr() {
-		return res
+		return res, nil, nil, nil
 	}
 	resp := reqres.Response.GetInfo()
-	return types.NewResultOK([]byte(resp.Info), LOG)
+	return types.NewResultOK([]byte(resp.Info), LOG), resp.TmspInfo, resp.LastBlock, resp.Config
 }
 
 func (cli *grpcClient) SetOptionSync(key string, value string) (res types.Result) {
@@ -321,8 +321,8 @@ func (cli *grpcClient) InitChainSync(validators []*types.Validator) (err error) 
 	return cli.Error()
 }
 
-func (cli *grpcClient) BeginBlockSync(height uint64) (err error) {
-	cli.BeginBlockAsync(height)
+func (cli *grpcClient) BeginBlockSync(hash []byte, header *types.Header) (err error) {
+	cli.BeginBlockAsync(hash, header)
 	return cli.Error()
 }
 

@@ -1,6 +1,12 @@
 hash: 39a4acd2d6e0a12df5541e68bdb8ca367ab818e1a022b4186a9310c6790f0e2c
-updated: 2016-11-16T19:02:15.388851702+01:00
+updated: 2016-11-18T14:31:28.925289873+01:00
 imports:
+- name: github.com/alecthomas/template
+  version: a0175ee3bccc567396460bf5acd36800cb10c49c
+  subpackages:
+  - parse
+- name: github.com/alecthomas/units
+  version: 2efee857e7cfd4f3d0138cc3cbb1b4966962b93a
 - name: github.com/btcsuite/btcd
   version: 83432785f3df1f0b6f8e6926dfe0987a34ea5b3c
   subpackages:
@@ -95,7 +101,7 @@ imports:
   - rpc/core/types
   - types
 - name: github.com/tendermint/tmsp
-  version: ab98bffbb1a9d8e1df9fb673406f892ac7f8a414
+  version: 3a70c07ed1d3041f749dea296a7e91e9f324f1af
   subpackages:
   - server
   - types
@@ -125,7 +131,7 @@ imports:
   subpackages:
   - unix
 - name: google.golang.org/grpc
-  version: 3235584c703acd8af8ab25132618c987c5606b66
+  version: b13ef794997191ec801db90a42c50034df91850a
   subpackages:
   - codes
   - credentials

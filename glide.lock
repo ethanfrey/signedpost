@@ -1,5 +1,5 @@
 hash: bdd2c108ef803443c04eb3d80893d8781961a35793b77650c9fecc504c3e9b57
-updated: 2016-12-19T09:29:19.543124432+01:00
+updated: 2016-12-19T15:16:33.323678293+01:00
 imports:
 - name: github.com/alecthomas/template
   version: a0175ee3bccc567396460bf5acd36800cb10c49c
@@ -16,9 +16,12 @@ imports:
 - name: github.com/BurntSushi/toml
   version: 99064174e013895bbd9b025c31100bd1d9b590ca
 - name: github.com/ethanfrey/tenderize
-  version: 992ca5ba62be32c9044e3e05f31e5e5e3a6a2ffd
+  version: 2bdeaa86863de5b9fec6404169d16c4b76229e9f
   subpackages:
   - client
+  - mom
+  - sign
+  - wire
 - name: github.com/go-stack/stack
   version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
 - name: github.com/golang/protobuf

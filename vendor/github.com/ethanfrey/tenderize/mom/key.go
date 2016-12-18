@@ -31,6 +31,14 @@ func KeyToBytes(key Key) ([]byte, error) {
 	return wutil.ToBinary(mkey{key})
 }
 
+// KeyFromBytes recovers a Key object from arbitrary byte data (eg. from API)
+func KeyFromBytes(data []byte) (Key, error) {
+	// Is there an easier way
+	holder := mkey{}
+	err := wutil.FromBinary(data, &holder)
+	return holder.Key, err
+}
+
 // Load attempts to find the data matching the given key
 // If the key or store data cannot be parsed, returns error
 // If there is no data, Model is nil

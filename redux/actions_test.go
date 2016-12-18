@@ -34,17 +34,17 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(1, tree.Size())
 
 	// let's check this account by key
-	data, err := store.FindAccountByPK(tree, alice.PubKey())
+	data, err := store.FindAccount(tree, alice.PubKey())
 	assert.Nil(err)
 	if assert.NotNil(data) {
 		assert.Equal(data.Name, "Alice")
 	}
 
 	// let's check this account by name
-	data, err = store.FindAccountByName(tree, "Alice")
+	matches, err := store.ListAccounts(tree, store.AccountMatchesName("Alice"))
 	assert.Nil(err)
-	if assert.NotNil(data) {
-		assert.Equal(data.Name, "Alice")
+	if assert.Equal(1, len(matches)) {
+		assert.Equal(matches[0].Name, "Alice")
 	}
 
 	// error by second name
@@ -94,24 +94,29 @@ func TestAppendPost(t *testing.T) {
 	r = srv.CreateAccount(utx, pub)
 	assert.False(r.IsErr(), r.Error())
 	assert.Equal(1, tree.Size())
-	acctKey := r.Data
+	// acctKey := r.Data
 
 	// now, let's add a post...
 	r = srv.AppendPost(tx, pub)
 	assert.False(r.IsErr(), "%+v", r.Error())
 	assert.Equal(2, tree.Size())
-	postKey := r.Data
+	// postKey := r.Data
 
 	// let's check the post
-	pp, err := store.FindPostByKey(tree, postKey)
+	acct := store.NewAccount(pub, "sss")
+	myPosts := store.PostsForAccount(acct, 0)
+	// firstPosts := store.PostsForAccount(acct, 1)
+
+	pp, err := store.ListPosts(tree, myPosts, nil)
 	require.Nil(err, "%+v", err)
-	require.NotNil(pp)
-	assert.Equal(tx.Title, pp.Title)
-	assert.Equal(srv.GetHeight(), pp.PublishedBlock)
-	assert.EqualValues(1, pp.Number)
+	if assert.Equal(1, len(pp)) {
+		assert.Equal(tx.Title, pp[0].Title)
+		assert.Equal(srv.GetHeight(), pp[0].PublishedBlock)
+		assert.EqualValues(1, pp[0].Number)
+	}
 
 	// get the account and check it was updated
-	aa, err := store.FindAccountByKey(tree, acctKey)
+	aa, err := store.FindAccount(tree, pub)
 	assert.Nil(err)
 	if assert.NotNil(aa) {
 		assert.Equal("Alice", aa.Name)
@@ -128,7 +133,7 @@ func TestAppendPost(t *testing.T) {
 	assert.EqualValues(3, tree.Size())
 
 	// get the account and check it was updated
-	aa, err = store.FindAccountByKey(tree, acctKey)
+	aa, err = store.FindAccount(tree, pub)
 	assert.Nil(err)
 	if assert.NotNil(aa) {
 		assert.Equal("Alice", aa.Name)
@@ -136,7 +141,7 @@ func TestAppendPost(t *testing.T) {
 	}
 
 	// let's check the post
-	posts, err := store.FindPostsForAccount(tree, acctKey)
+	posts, err := store.ListPosts(tree, myPosts, nil)
 	require.Nil(err, "%+v", err)
 	require.Equal(2, len(posts))
 	assert.Equal(tx.Title, posts[0].Title)

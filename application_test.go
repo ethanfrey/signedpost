@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethanfrey/signedpost/store"
 	"github.com/ethanfrey/signedpost/txn"
+	"github.com/ethanfrey/tenderize/mom"
 	"github.com/ethanfrey/tenderize/sign"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -37,10 +38,12 @@ func TestApplication(t *testing.T) {
 	// make sure we can query
 	qres := app.Query(ukey)
 	assert.False(qres.IsErr(), qres.Error())
-	acct := store.Account{}
-	err = acct.Deserialize(qres.Data)
+	model, err := mom.ModelFromBytes(qres.Data)
 	if assert.Nil(err, "%+v", err) {
-		assert.Equal(acct.Name, "Grey")
+		acct, ok := model.(store.Account)
+		if assert.True(ok) {
+			assert.Equal(acct.Name, "Grey")
+		}
 	}
 
 	// now add the post

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/ethanfrey/tenderize/mom"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	crypto "github.com/tendermint/go-crypto"
@@ -15,64 +16,86 @@ func TestAccount(t *testing.T) {
 	require := require.New(t)
 	priv := crypto.GenPrivKeyEd25519()
 	pub := priv.PubKey()
-	key, err := AccountKeyFromPK(pub)
-	require.Nil(err)
+	badpriv := crypto.GenPrivKeyEd25519()
+	badpub := badpriv.PubKey()
 
 	tree := merkle.NewIAVLTree(0, nil) // in-memory
 	assert.Equal(0, tree.Size())
 
 	// make sure empty searches work as expected
-	match, err := FindAccountByPK(tree, pub)
+	match, err := FindAccount(tree, pub)
 	assert.Nil(match)
 	assert.Nil(err)
-	match, err = FindAccountByKey(tree, key)
-	assert.Nil(match)
+	matches, err := ListAccounts(tree, AccountMatchesName("Demo"))
+	assert.Equal(0, len(matches))
 	assert.Nil(err)
-	match, err = FindAccountByKey(tree, []byte("foobar"))
-	assert.Nil(match)
-	// assert.NotNil(err)
-	match, err = FindAccountByName(tree, "Demo")
-	assert.Nil(match)
-	assert.Nil(err)
-
-	acct := Account{Name: "Demo"}
-	_, err = acct.Serialize()
-	require.Nil(err)
 
 	// on set
-	updated, err := acct.Save(tree, key)
+	acct := NewAccount(pub, "Demo")
+	updated, err := mom.Save(tree, acct)
 	assert.False(updated)
-	assert.Nil(err)
+	require.Nil(err)
 
-	// update proper
-	acct.EntryCount = 2
-	updated, err = acct.Save(tree, key)
+	// on update
+	acct.Name = "Demoed"
+	updated, err = mom.Save(tree, acct)
 	assert.True(updated)
-	assert.Nil(err)
+	require.Nil(err)
 
-	// cannot save to invalid address
-	_, err = acct.Save(tree, nil)
-	assert.NotNil(err)
+	// TODO: add some more checks to tenderize for this case?
+	// // cannot save to invalid address
+	// _, err = mom.Save(tree, Account{})
+	// assert.NotNil(err)
 
-	// Now we search....
-	match, err = FindAccountByPK(tree, pub)
+	// make sure it is stores under one key
+	match, err = FindAccount(tree, pub)
 	assert.Nil(err)
-	assertAccount(t, &acct, match)
-	match, err = FindAccountByKey(tree, key)
+	assertAccount(t, acct, *match)
+	match, err = FindAccount(tree, badpub)
 	assert.Nil(err)
-	assertAccount(t, &acct, match)
-	match, err = FindAccountByName(tree, "Demo")
+	assert.Nil(match)
+
+	// raw mom query
+	query := mom.Query{
+		Key: AccountKey{},
+	}
+	models, err := mom.List(tree, query)
 	assert.Nil(err)
-	assertAccount(t, &acct, match)
+	assert.Equal(1, len(models))
+
+	// and try a few searches
+	// all account...
+	matches, err = ListAccounts(tree, nil)
+	assert.Nil(err)
+	if assert.Equal(1, len(matches)) {
+		assertAccount(t, acct, matches[0])
+	}
+
+	// Exact match on name
+	matches, err = ListAccounts(tree, AccountMatchesName("Demoed"))
+	assert.Nil(err)
+	if assert.Equal(1, len(matches)) {
+		assertAccount(t, acct, matches[0])
+	}
+
+	// contains match on substring
+	matches, err = ListAccounts(tree, AccountContainsName("deMO"))
+	assert.Nil(err)
+	if assert.Equal(1, len(matches)) {
+		assertAccount(t, acct, matches[0])
+	}
+
+	// exact match on substring
+	matches, err = ListAccounts(tree, AccountMatchesName("Demo"))
+	assert.Nil(err)
+	assert.Equal(0, len(matches))
 }
 
-func assertAccount(t *testing.T, acct *Account, match *AccountField) {
+func assertAccount(t *testing.T, acct Account, match Account) {
 	assert := assert.New(t)
-	if assert.NotNil(acct) && assert.NotNil(match) {
-		assert.NotNil(match.Key)
-		assert.Equal(acct.Name, match.Name)
-		assert.Equal(acct.EntryCount, match.EntryCount)
-	}
+	assert.True(bytes.Equal(acct.ID, match.ID))
+	assert.Equal(acct.Name, match.Name)
+	assert.Equal(acct.EntryCount, match.EntryCount)
 }
 
 func TestMultipleAccounts(t *testing.T) {
@@ -82,44 +105,37 @@ func TestMultipleAccounts(t *testing.T) {
 	tree := merkle.NewIAVLTree(0, nil) // in-memory
 	assert.Equal(0, tree.Size())
 
-	akey, alice := makeAccount(t, tree, "Alice")
-	bkey, bob := makeAccount(t, tree, "Bob")
+	alice := makeAccount(t, tree, "Alice")
+	bob := makeAccount(t, tree, "Bob")
 
 	assert.Equal(2, tree.Size())
 
-	accts, err := AllAccounts(tree)
+	accts, err := ListAccounts(tree, nil)
 	require.Nil(err)
 	require.Equal(2, len(accts))
 
 	ai, bi := 0, 1
-	if bytes.Compare(akey, bkey) > 0 {
+	if bytes.Compare(alice.ID, bob.ID) > 0 {
 		ai, bi = 1, 0
 	}
 	assertAccount(t, alice, accts[ai])
 	assertAccount(t, bob, accts[bi])
 
 	// and one more makes three...
-	_, _ = makeAccount(t, tree, "Carl")
-	accts, err = AllAccounts(tree)
+	makeAccount(t, tree, "Carl")
+	accts, err = ListAccounts(tree, nil)
 	require.Nil(err)
 	require.Equal(3, len(accts))
 }
 
-func makeAccount(t *testing.T, tree merkle.Tree, name string) (key []byte, acct *Account) {
+func makeAccount(t *testing.T, tree merkle.Tree, name string) (acct Account) {
 	assert := assert.New(t)
-	require := require.New(t)
-
 	pub := crypto.GenPrivKeyEd25519().PubKey()
-	key, err := AccountKeyFromPK(pub)
-	require.Nil(err)
+	acct = NewAccount(pub, name)
 
-	acct = &Account{Name: name}
-	_, err = acct.Serialize()
-	require.Nil(err)
-
-	updated, err := acct.Save(tree, key)
+	updated, err := mom.Save(tree, acct)
 	assert.False(updated)
 	assert.Nil(err)
 
-	return key, acct
+	return acct
 }

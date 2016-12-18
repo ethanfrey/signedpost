@@ -2,7 +2,7 @@ package signedpost
 
 import (
 	"github.com/ethanfrey/signedpost/redux"
-	"github.com/ethanfrey/signedpost/txn"
+	"github.com/ethanfrey/tenderize/sign"
 	merkle "github.com/tendermint/go-merkle"
 	tmsp "github.com/tendermint/tmsp/types"
 )
@@ -34,7 +34,7 @@ func (app *Application) SetOption(key, value string) string {
 
 // AppendTx actually does something
 func (app *Application) AppendTx(tx []byte) tmsp.Result {
-	action, err := txn.Receive(tx)
+	action, err := sign.Receive(tx)
 	if err != nil {
 		return tmsp.NewError(tmsp.CodeType_BaseInvalidInput, err.Error())
 	}
@@ -43,7 +43,7 @@ func (app *Application) AppendTx(tx []byte) tmsp.Result {
 
 // CheckTx validates a tx for the mempool
 func (app *Application) CheckTx(tx []byte) tmsp.Result {
-	action, err := txn.Receive(tx)
+	action, err := sign.Receive(tx)
 	if err != nil {
 		return tmsp.NewError(tmsp.CodeType_BaseInvalidInput, err.Error())
 	}

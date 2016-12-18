@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ethanfrey/signedpost/txn"
+	"github.com/ethanfrey/tenderize/sign"
 	merkle "github.com/tendermint/go-merkle"
 	tmsp "github.com/tendermint/tmsp/types"
 )
@@ -54,7 +55,7 @@ func (s *Service) Copy() *Service {
 
 // Apply will take any authentication action and apply it to the store
 // TODO: change result type??
-func (s *Service) Apply(tx txn.ValidatedAction) tmsp.Result {
+func (s *Service) Apply(tx sign.ValidatedAction) tmsp.Result {
 	switch action := tx.GetAction().(type) {
 	case txn.CreateAccountAction:
 		return s.CreateAccount(action, tx.GetSigner())

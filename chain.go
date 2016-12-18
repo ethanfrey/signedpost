@@ -8,9 +8,9 @@ import (
 
 	ctypes "github.com/tendermint/tendermint/rpc/core/types"
 
-	"github.com/ethanfrey/signedpost/txn"
 	"github.com/ethanfrey/signedpost/utils"
 	"github.com/ethanfrey/tenderize/client"
+	"github.com/ethanfrey/tenderize/sign"
 	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 )
@@ -49,8 +49,8 @@ func (p Proxy) PostTransaction(rw http.ResponseWriter, r *http.Request) {
 		}
 	}
 	if err == nil {
-		var val txn.ValidatedAction
-		val, err = txn.Receive(tx)
+		var val sign.ValidatedAction
+		val, err = sign.Receive(tx)
 		if err == nil && val.IsAnon() {
 			err = errors.New("All transactions require a valid signature")
 		}

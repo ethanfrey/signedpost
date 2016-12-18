@@ -1,11 +1,12 @@
 package txn
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ethanfrey/tenderize/sign"
 	"github.com/tendermint/go-crypto"
 )
 
@@ -15,7 +16,7 @@ func TestSignVerify(t *testing.T) {
 
 	// let's sign the action and make sure that works
 	action := CreateAccountAction{Name: "John"}
-	signed, err := SignAction(action, privKey)
+	signed, err := sign.SignAction(action, privKey)
 	require.Nil(err)
 	assert.NotNil(signed.GetActionData())
 	assert.True(len(signed.GetActionData()) > 4) // It must contain at least "John"
@@ -31,12 +32,6 @@ func TestSignVerify(t *testing.T) {
 	ca, ok := act.(CreateAccountAction)
 	if assert.True(ok) {
 		assert.Equal(action.Name, ca.Name)
-	} else {
-		fmt.Println("Let's try a pointer")
-		captr, ok := act.(*CreateAccountAction)
-		if assert.True(ok) && assert.NotNil(captr) {
-			assert.Equal(action.Name, captr.Name)
-		}
 	}
 }
 
@@ -46,7 +41,7 @@ func TestSignSerialization(t *testing.T) {
 
 	// let's sign the action and make sure that works
 	action := AddPostAction{Title: "First Post", Content: "Some text here"}
-	signed, err := SignAction(action, privKey)
+	signed, err := sign.SignAction(action, privKey)
 	require.Nil(err)
 
 	wire, err := signed.Serialize()
@@ -54,21 +49,21 @@ func TestSignSerialization(t *testing.T) {
 	require.Equal(129, len(wire))
 
 	// make sure the data is there
-	parsed, err := Receive(wire)
+	parsed, err := sign.Receive(wire)
 	require.Nil(err, "%+v", err)
 	assert.Equal(signed.GetActionData(), parsed.GetActionData())
 	assert.Equal(signed.GetSigner(), parsed.GetSigner())
 
 	// serialize a second object and make sure the same wire
 	a2 := AddPostAction{Title: "First Post"}
-	wire2, err := Send(a2, privKey)
+	wire2, err := sign.Send(a2, privKey)
 	require.Nil(err, "%+v", err)
 	assert.NotEqual(wire, wire2)
 	// 14 chars less, means shorter data (why 15?)
 	assert.Equal(len(wire)-15, len(wire2))
 
 	a2.Content = "Some text here"
-	wire3, err := Send(a2, privKey)
+	wire3, err := sign.Send(a2, privKey)
 	require.Nil(err, "%+v", err)
 	assert.Equal(wire, wire3)
 }

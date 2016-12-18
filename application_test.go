@@ -5,6 +5,7 @@ import (
 
 	"github.com/ethanfrey/signedpost/store"
 	"github.com/ethanfrey/signedpost/txn"
+	"github.com/ethanfrey/tenderize/sign"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	crypto "github.com/tendermint/go-crypto"
@@ -23,7 +24,7 @@ func TestApplication(t *testing.T) {
 	// TODO: use BeginBlock(2), when that works...
 	app.EndBlock(1)
 	utx := txn.CreateAccountAction{Name: "Grey"}
-	data, err := txn.Send(utx, earl)
+	data, err := sign.Send(utx, earl)
 	require.Nil(err, "%+v", err)
 	require.NotNil(data)
 	ures := app.AppendTx(data)
@@ -47,7 +48,7 @@ func TestApplication(t *testing.T) {
 		Title:   "Good post",
 		Content: "Some imporant info",
 	}
-	pdata, err := txn.Send(ptx, earl)
+	pdata, err := sign.Send(ptx, earl)
 	require.Nil(err, "%+v", err)
 	require.NotNil(pdata)
 	// make sure check works, but doesn't update data

@@ -1,15 +1,9 @@
 package txn
 
-import "github.com/tendermint/go-wire"
+import "github.com/ethanfrey/tenderize/sign"
 
 func init() {
-	wire.RegisterInterface(
-		actionWrapper{},
-		wire.ConcreteType{O: CreateAccountAction{}, Byte: 0x01},
-		wire.ConcreteType{O: &CreateAccountAction{}, Byte: 0x02},
-		wire.ConcreteType{O: AddPostAction{}, Byte: 0x03},
-		wire.ConcreteType{O: &AddPostAction{}, Byte: 0x04},
-	)
+	sign.RegisterActions(CreateAccountAction{}, AddPostAction{})
 }
 
 // actionWrapper is needed by go-wire to handle the interface

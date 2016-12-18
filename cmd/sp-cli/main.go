@@ -15,6 +15,7 @@ import (
 	"gopkg.in/alecthomas/kingpin.v2"
 
 	"github.com/ethanfrey/signedpost/txn"
+	"github.com/ethanfrey/tenderize/sign"
 )
 
 type txPost struct {
@@ -78,10 +79,10 @@ func main() {
 	switch cmd {
 	case user.FullCommand():
 		tx := txn.CreateAccountAction{Name: *name}
-		data, err = txn.Send(tx, key)
+		data, err = sign.Send(tx, key)
 	case post.FullCommand():
 		tx := txn.AddPostAction{Title: *title, Content: *content}
-		data, err = txn.Send(tx, key)
+		data, err = sign.Send(tx, key)
 	}
 	if err != nil {
 		kingpin.Fatalf("Creating transaction: %+v\n", err)

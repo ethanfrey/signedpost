@@ -8,6 +8,7 @@ import:
   subpackages:
   - types
 - package: github.com/ethanfrey/tenderize
+  version: ^0.1.0
 - package: github.com/rs/cors
   version: ^1.0.0
 - package: gopkg.in/alecthomas/kingpin.v2

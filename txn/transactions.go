@@ -6,16 +6,6 @@ func init() {
 	sign.RegisterActions(CreateAccountAction{}, AddPostAction{})
 }
 
-// actionWrapper is needed by go-wire to handle the interface
-type actionWrapper struct {
-	Action
-}
-
-// Action tries to limit the types we support to desired ones
-type Action interface {
-	IsAction() error
-}
-
 // CreateAccountAction is used once to claim a username for a given public key
 type CreateAccountAction struct {
 	Name string // this is a name to search for
